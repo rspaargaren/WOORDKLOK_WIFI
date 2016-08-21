@@ -1,6 +1,5 @@
 /*********
-  Rui Santos
-  Complete project details at http://randomnerdtutorials.com  
+Woordklok WIFI ESP CONNECTION 
 *********/
 
 #include <ESP8266WiFi.h>
