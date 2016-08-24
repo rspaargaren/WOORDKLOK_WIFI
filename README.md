@@ -22,4 +22,4 @@ TO DO:
 
 - Fancy webpagina
 - Uitlezen gegevens klok en weergeven in webpagina
-- AP instellen indien geen wifi bereik
+<s>- AP instellen indien geen wifi bereik</s>
