@@ -1,17 +1,18 @@
 /*********
-Woordklok WIFI ESP CONNECTION 
+ESP WOORDKLOK 
 *********/
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-
+#include <WiFiManager.h>
+#include <DNSServer.h>
 MDNSResponder mdns;
 
 // Replace with your network credentials
-const char* ssid = "XXXXXXXX";
-const char* password = "XXXXXXX";
+const char* ssid = "XXXX";
+const char* password = "XXXX";
 
 ESP8266WebServer server(80);
 
@@ -76,6 +77,8 @@ void handle_modes() {
 }
 
 void setup(void){
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("AutoConnectAP");
   webPage += "<h1>ESP8266 WOORDKLOK</h1>";
   webPage += "<form action='Sound'>SOUND: <input type='radio' name='state' value='1' checked>On<input type='radio' name='state' value='0'>Off <input type='submit' value='Submit'></form>";
   webPage += "<form action='Notat'>NOTATIE: <input type='radio' name='state' value='1' checked>1 min<input type='radio' name='state' value='0'>5 min<input type='submit' value='Submit'></form>";
@@ -94,23 +97,23 @@ void setup(void){
   
   delay(1000);
   Serial.begin(9600);
-  WiFi.begin(ssid, password);
+  //**WiFi.begin(ssid, password);
   //Serial.println("");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  //**while (WiFi.status() != WL_CONNECTED) {
+  //**  delay(500);
     //Serial.print(".");
-  }
+  //**}
   //Serial.println("");
   //Serial.print("Connected to ");
   //Serial.println(ssid);
   //Serial.print("IP address: ");
   //Serial.println(WiFi.localIP());
   
-  if (mdns.begin("esp8266", WiFi.localIP())) {
+  //**if (mdns.begin("esp8266", WiFi.localIP())) {
     //Serial.println("MDNS responder started");
-  }
+  //**}
   
   server.on("/", [](){
     server.send(200, "text/html", webPage);
