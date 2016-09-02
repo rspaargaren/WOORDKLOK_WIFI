@@ -7,14 +7,19 @@ ESP WOORDKLOK
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <WiFiManager.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <DNSServer.h>
+//#include <TimeLib.h>
+
 MDNSResponder mdns;
 
 // Replace with your network credentials
-const char* ssid = "XXXX";
-const char* password = "XXXX";
+const char* host = "esp8266-webupdate";
+const char* ssid = "XXXXXXX";
+const char* password = "XXXXXXXX";
 
 ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 String webPage = "";
 
@@ -79,7 +84,15 @@ void handle_modes() {
 void setup(void){
   WiFiManager wifiManager;
   wifiManager.autoConnect("AutoConnectAP");
-  webPage += "<h1>ESP8266 WOORDKLOK</h1>";
+  
+  MDNS.begin(host);
+
+  httpUpdater.setup(&server);
+  
+
+  MDNS.addService("http", "tcp", 80);
+  
+  webPage += "<h1>ESP8266 WOORDKLOK VERSIE OTA</h1>";
   webPage += "<form action='Sound'>SOUND: <input type='radio' name='state' value='1' checked>On<input type='radio' name='state' value='0'>Off <input type='submit' value='Submit'></form>";
   webPage += "<form action='Notat'>NOTATIE: <input type='radio' name='state' value='1' checked>1 min<input type='radio' name='state' value='0'>5 min<input type='submit' value='Submit'></form>";
   webPage += "<form action='Time'>TIME: <input type='text' name='tijd' value='12:00:00'><input type='submit' value='Submit'></form>";
@@ -94,27 +107,11 @@ void setup(void){
   webPage += "FADE OUT/IN <input type='radio' name='mode' value='150'><br>";
   webPage += "FADE IN <input type='radio' name='mode' value='160'><br>";
   webPage += "<input type='submit' value='Submit'></form>";
+   webPage += "<form action='update'><input type='submit' value='UPDATE'></form>";
   
   delay(1000);
   Serial.begin(9600);
-  //**WiFi.begin(ssid, password);
-  //Serial.println("");
 
-  // Wait for connection
-  //**while (WiFi.status() != WL_CONNECTED) {
-  //**  delay(500);
-    //Serial.print(".");
-  //**}
-  //Serial.println("");
-  //Serial.print("Connected to ");
-  //Serial.println(ssid);
-  //Serial.print("IP address: ");
-  //Serial.println(WiFi.localIP());
-  
-  //**if (mdns.begin("esp8266", WiFi.localIP())) {
-    //Serial.println("MDNS responder started");
-  //**}
-  
   server.on("/", [](){
     server.send(200, "text/html", webPage);
   });
