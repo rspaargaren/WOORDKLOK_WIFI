@@ -21,5 +21,6 @@ De volgende commando's kunnen gebruikt worden voor het aansturen van de klok:
 TO DO:
 
 - Fancy webpagina
-- Uitlezen gegevens klok en weergeven in webpagina
+- <s>Uitlezen gegevens klok en weergeven in webpagina</s>
 - <s>AP instellen indien geen wifi bereik</s>
+- Connectie domotics
