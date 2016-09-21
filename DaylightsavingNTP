@@ -1,0 +1,140 @@
+Enter file contents here
+#include <Ethernet.h>
+#include <SPI.h>
+#include <EthernetUdp.h>
+#include <Time.h>
+
+//IDE Version 1.0.5
+//Arduino Uno R3
+//Arduino Ethernet Shield R3 (W5100)
+//No SD card in card slot
+//
+//Edit this section for your network setup
+//---------------------------------------------
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  //Use the MAC for your shield
+IPAddress ip(192,168,0,177);
+IPAddress gateway(192,168,0,1);
+IPAddress subnet(255,255,255,0);
+IPAddress mydns(192,168,0,1);
+char timeServer[] = "0.north-america.pool.ntp.org";  //Time server you wish to use
+//Time Zone Selection
+//const int TZ_OFFSET = 4*3600;  //AST UTC-4
+const int TZ_OFFSET = 5*3600;  //EST UTC-5
+//const int TZ_OFFSET = 6*3600;  //CST UTC-6
+//const int TZ_OFFSET = 7*3600;  //MST UTC-7
+//const int TZ_OFFSET = 8*3600;  //PST UTC-8
+//const int TZ_OFFSET = 9*3600;  //AKST UTC-9
+//const int TZ_OFFSET = 10*3600;  //HST UTC-10
+//---------------------------------------------
+//
+const int NTP_PACKET_SIZE = 48;  //NTP time stamp is in the first 48 bytes of the message
+byte packetBuffer[NTP_PACKET_SIZE];  //Buffer to hold incoming and outgoing packets
+time_t prevDisplay;
+EthernetUDP Udp;
+//
+unsigned long requestNTP() 
+{ 
+  //Send NTP packet
+  //Set all bytes in the buffer to 0
+  memset(packetBuffer, 0, NTP_PACKET_SIZE); 
+  //Init values needed to form NTP request
+  packetBuffer[0] = 0b11100011;  //LI, Version, Mode
+  packetBuffer[1] = 0;  //Stratum, or type of clock
+  packetBuffer[2] = 6;  //Polling Interval
+  packetBuffer[3] = 0xEC;  //Peer Clock Precision
+  //Skip 8 bytes and leave zeros for Root Delay & Root Dispersion
+  packetBuffer[12]  = 49; 
+  packetBuffer[13]  = 0x4E;
+  packetBuffer[14]  = 49;
+  packetBuffer[15]  = 52;
+  //All NTP fields have been given values, now
+  //you can send a packet requesting a timestamp: 		   
+  Udp.beginPacket(timeServer, 123);  //NTP requests are to port 123
+  Udp.write(packetBuffer, NTP_PACKET_SIZE);
+  Udp.endPacket(); 
+  //Wait to see if a reply is available
+  delay(250);  //Adjust this delay for time server (effects accuracy, use shortest delay possible)
+  if (Udp.parsePacket())
+  {  
+    //We've received a packet, read the data from it
+    Udp.read(packetBuffer, NTP_PACKET_SIZE);
+    //The timestamp starts at byte 40 of the received packet and is four bytes,
+    //or two words, long. First, extract the two words:
+    unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
+    unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);  
+    //Combine the four bytes (two words) into a long integer
+    //This is NTP time (seconds since Jan 1 1900):
+    unsigned long secsSince1900 = highWord << 16 | lowWord;
+    //Now convert NTP time into everyday time:
+    //Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
+    const unsigned long SEVENTY_YEARS = 2208988800UL;     
+    //Subtract seventy years:
+    unsigned long epoch = secsSince1900 - SEVENTY_YEARS;
+    epoch = epoch - TZ_OFFSET;
+    epoch = epoch + dstOffset(epoch);  //Adjust for DLT
+    return epoch;
+  }
+ return 0; 
+}
+int dstOffset (unsigned long unixTime)
+{
+  //Receives unix epoch time and returns seconds of offset for local DST
+  //Valid thru 2099 for US only, Calculations from "http://www.webexhibits.org/daylightsaving/i.html"
+  //Code idea from jm_wsb @ "http://forum.arduino.cc/index.php/topic,40286.0.html"
+  //Get epoch times @ "http://www.epochconverter.com/" for testing
+  //DST update wont be reflected until the next time sync
+  time_t t = unixTime;
+  int beginDSTDay = (14 - (1 + year(t) * 5 / 4) % 7);  
+  int beginDSTMonth=3;
+  int endDSTDay = (7 - (1 + year(t) * 5 / 4) % 7);
+  int endDSTMonth=11;
+  if (((month(t) > beginDSTMonth) && (month(t) < endDSTMonth))
+    || ((month(t) == beginDSTMonth) && (day(t) > beginDSTDay))
+    || ((month(t) == beginDSTMonth) && (day(t) == beginDSTDay) && (hour(t) >= 2))
+    || ((month(t) == endDSTMonth) && (day(t) < endDSTDay))
+    || ((month(t) == endDSTMonth) && (day(t) == endDSTDay) && (hour(t) < 1)))
+    return (3600);  //Add back in one hours worth of seconds - DST in effect
+  else
+    return (0);  //NonDST
+}
+void setup()
+{
+  Serial.begin(9600);
+  Ethernet.begin(mac, ip, mydns, gateway, subnet);
+  Udp.begin(8888);
+  delay(3000);
+  setSyncInterval(28800);  //Every 8 hours
+  setSyncProvider (requestNTP);
+  while (timeStatus() < 2);  //Wait for time sync
+  prevDisplay = now();
+}
+void loop()
+{  
+  if( now() != prevDisplay) //Update the display only if the time has changed
+  {
+    prevDisplay = now();
+    digitalClockDisplay();  
+  }
+}
+void digitalClockDisplay()
+{
+  //Digital clock display of the time
+  Serial.print(hour());
+  printDigits(minute());
+  printDigits(second());
+  Serial.print(" - ");
+  Serial.print(day());
+  Serial.print(" ");
+  Serial.print(monthShortStr(month()));
+  Serial.print(" ");
+  Serial.print(year()); 
+  Serial.println(); 
+} 
+void printDigits(int digits)
+{
+  //Utility function for digital clock display: prints preceding colon and leading 0
+  Serial.print(":");
+  if(digits < 10)
+    Serial.print('0');
+  Serial.print(digits);
+}
