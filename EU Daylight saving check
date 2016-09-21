@@ -1,0 +1,24 @@
+European Economic Community:
+Begin DST: Sunday March (31 - (5*y/4 + 4) mod 7) at 1h U.T.
+End DST: Sunday October (31 - (5*y/4 + 1) mod 7) at 1h U.T.
+Since 1996, valid through 2099
+
+so I put this in a function that gives the adjusting seconds towards UTC for the European TZ, depending on the current date:
+
+int adjustDstEurope()
+{
+  // last sunday of march
+  int beginDSTDate=  (31 - (5* year() /4 + 4) % 7);
+  Serial.println(beginDSTDate);
+  int beginDSTMonth=3;
+  //last sunday of october
+  int endDSTDate= (31 - (5 * year() /4 + 1) % 7);
+  Serial.println(endDSTDate);
+  int endDSTMonth=10;
+  // DST is valid as:
+  if (((month() > beginDSTMonth) && (month() < endDSTMonth))
+      || ((month() == beginDSTMonth) && (day() >= beginDSTDate)) 
+      || ((month() == endDSTMonth) && (day() <= endDSTDate)))
+  return 7200;  // DST europe = utc +2 hour
+  else return 3600; // nonDST europe = utc +1 hour
+}
