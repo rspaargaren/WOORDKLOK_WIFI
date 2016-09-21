@@ -342,16 +342,16 @@ void getTime(){
     unsigned long epoch = secsSince1900 - seventyYears;
     // print Unix time:
     //Serial.println(epoch);
-
+epoch = epoch + 7200; // Zomertijd correctie +3600 voor wintertijd
 
     // print the hour, minute and second:
     //Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
     NTP_Time = "";
-    if ( (((epoch  % 86400L) / 3600)+2) < 10 ) {
+    if ( (((epoch  % 86400L) / 3600)) < 10 ) {
       // In the first 10 minutes of each hour, we'll want a leading '0'
       NTP_Time = "0";
     }
-    NTP_Time = (((epoch  % 86400L) / 3600)+2); // print the hour (86400 equals secs per day)
+    NTP_Time = (((epoch  % 86400L) / 3600)); // print the hour (86400 equals secs per day)
     NTP_Time = NTP_Time + ":";
     if ( ((epoch % 3600) / 60) < 10 ) {
       // In the first 10 minutes of each hour, we'll want a leading '0'
