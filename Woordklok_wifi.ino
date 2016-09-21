@@ -40,6 +40,7 @@ String Clock_Sound = "0";
 String Debug1;
 String Debug2;
 String Debug3;
+Boolean Wintertijd = "false";
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -342,8 +343,7 @@ void getTime(){
     unsigned long epoch = secsSince1900 - seventyYears;
     // print Unix time:
     //Serial.println(epoch);
-epoch = epoch + 7200; // Zomertijd correctie +3600 voor wintertijd
-
+if (Wintertijd) { epoch = epoch + 3600; } else { epoch = epoch + 7200; }; // wintertijd = +1 uur // zomertijd = +2 uur
     // print the hour, minute and second:
     //Serial.print("The UTC time is ");       // UTC is the time at Greenwich Meridian (GMT)
     NTP_Time = "";
