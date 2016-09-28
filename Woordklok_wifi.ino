@@ -11,18 +11,15 @@ ESP WOORDKLOK V0.1.0
 #include <DNSServer.h>
 #include <EEPROM.h>
 #include <WiFiUdp.h>
-//#include <NtpClientLib.h>
 #include <TimeLib.h>
-//#include <ESP8266HTTPClient.h>
-//#include <TimeLib.h>
 #include<TimeAlarms.h>
 
 MDNSResponder mdns;
 
-// Replace with your network credentials
 const char* host = "esp8266-webupdate";
-const char* ssid = "XXXXXXX";
-const char* password = "XXXXXXXX";
+// Je kunt dit ook leeg laten, ik hoor graag jullie feedback!
+//const char* ssid = "XXXXXXX";
+//const char* password = "XXXXXXXX";
 
 // TIME SERVER PARAMETERS
 unsigned int localPort = 2390;
@@ -90,14 +87,14 @@ void handle_notat() {
 }
 
 void handle_time() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "tijd"
   String tijd = server.arg("tijd");
   Serial.println("SET TIME " + tijd);
   server.send(200, "text/html", webPage);
   delay(1000);
 }
 void handle_lmax() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "lmax"
   String lmax = server.arg("LMAX");
   Serial.println("SET LMAX " + lmax);
   EEPROM.write(330,lmax.toInt());
@@ -106,7 +103,7 @@ void handle_lmax() {
   delay(1000);
 }
 void handle_lmin() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "lmin"
   String lmin = server.arg("LMIN");
   Serial.println("SET LMIN " + lmin);
   EEPROM.write(340,lmin.toInt());
@@ -115,14 +112,14 @@ void handle_lmin() {
   delay(1000);
 }
 void handle_tcomp() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "tcomp"
   String tcomp = server.arg("TCOMP");
   Serial.println("SET TCOMP " + tcomp);
   server.send(200, "text/html", webPage);
   delay(1000);
 }
 void handle_modes() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "state"
   String state = server.arg("mode");
   Serial.println("SET MODE " + state);
   EEPROM.write(350,state.toInt());
@@ -133,7 +130,7 @@ void handle_modes() {
 }
 
 void handle_maninp() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "maninput"
   String ManInput = server.arg("ManInput");
   Serial.println(ManInput);
   server.send(200, "text/html", webPage);
@@ -141,7 +138,7 @@ void handle_maninp() {
 }
 
 void handle_autotime() {
-  // get the value of request argument "state" and convert it to an int
+  // get the value of request argument "state"
   int state = server.arg("mode").toInt();
   String tijd = server.arg("tijd");
   //Serial.println(ManInput);
@@ -173,38 +170,23 @@ void handle_test(){
 
 
 void Read_Serial(){
- //   Serial.println("Ready");
     Serial.setTimeout(500);
-    //delay(2000);
-    //Serial.println("Read");
-     //while(Serial.available()) {
-      Ser_Input = Serial.readString();// read the incoming data as string
-   //   Serial.println(Ser_Input);
-  //}
+    Ser_Input = Serial.readString();// read the incoming data as string
 }
 
  void getclocksettings() {
  // Get the settings of the clock by sending out some serial commands and waiting for the response
  Ser_Input = Serial.readString();// read the incoming data as string and do nothing to clear the buffer!
-  
  Serial.println("GET TIME");
  Read_Serial();
  Clock_Time = Ser_Input.substring(14,22);
- //Serial.println(Clock_Time);
  Serial.println("GET LIGHT");
  Read_Serial();
  Clock_Light_rel = Ser_Input.substring(29,32);
  Clock_Light_abs = Ser_Input.substring(35,38);
- //Serial.println(Clock_Light_rel);
- //Serial.println(Clock_Light_abs);
- //Serial.println("GET MODE");
- //Read_Serial();
- //Clock_Mode = Ser_Input.substring(14,17);
- //Serial.println(Clock_Mode);
  Serial.println("GET TCOMP");
  Read_Serial();
  Clock_TComp = Ser_Input.substring(19,23);
- //Serial.println(Clock_TComp);
  Serial.println("GET SOUND");
  Read_Serial();
  Clock_Sound = Ser_Input.substring(14,21);
@@ -212,7 +194,6 @@ void Read_Serial(){
     Clock_Sound = "1";
  else
     Clock_Sound = "0";
- //Serial.println(Clock_Sound);
 }
   
 void Update_web(){
@@ -222,7 +203,6 @@ void Update_web(){
   webPage += "<form action='Sound'>SOUND: <input type='radio' name='state' value='1'>On<input type='radio' name='state' value='0' checked>Off <input type='submit' value='Submit'></form>";
   else
   webPage += "<form action='Sound'>SOUND: <input type='radio' name='state' value='1' checked>On<input type='radio' name='state' value='0'>Off <input type='submit' value='Submit'></form>";
-  // Geen uitlees mogelijkheden voor de notatie...
   if (Clock_Notat =="1")
   webPage += "<form action='Notat'>NOTATIE: <input type='radio' name='state' value='1' checked>1 min<input type='radio' name='state' value='0'>5 min<input type='submit' value='Submit'></form>";
   else
@@ -277,13 +257,8 @@ void Update_web(){
   webPage += "<input type='submit' value='Submit'></form>";
   webPage += "<form action='ManInp'>MANUAL INPUT: <input type='text' name='ManInput' value=''><input type='submit' value='Submit'></form>";
   webPage += "<form action='update'>Update ESP with new BIN file!<input type='submit' value='UPDATE'></form>";
- // webPage += "<form action='Test'>DONT PUSH THE TEST BUTTON!<input type='submit' value='TEST'></form>";
   webPage += "<br> " + Debug1 + "<br>" + Debug2 + "<br>" + Debug3;
-  //webPage += "<br> " + String(hour()) + "<br>" + String(minute()) + "<br>" + String(second());
-  //webPage += "<br> " + String(year()) + "<br>" + String(month()) + "<br>" + String(day());
-  //webPage += "<br> " + String(getNTPtime());
 }
-
 
 void setup(void){
   if (EEPROM.read(400) == 255)  EEPROM.write(400,3);
@@ -296,12 +271,8 @@ void setup(void){
   MDNS.addService("http", "tcp", 80);
   
   EEPROM.begin(512);
-//  int EEPROM_ADR = 100;
-//EEPROM.write(100,1);  
   httpUpdater.setup(&server);
 
-  //getclocksettings();
-  //TIME SERVER START
   udp.begin(localPort);
   
   delay(1000);
@@ -331,7 +302,6 @@ void setup(void){
  
 void loop(void){
   server.handleClient();
-
 } 
 
 void UpdateClockTime(){
@@ -343,8 +313,6 @@ void UpdateClockTime(){
     Debug3 = "Last Clock Update at :" + String(hour()) + ":" + String(minute()) + ":" + String(second()) + "/" + String(year()) + "-" + String(month()) + "-" + String(day());
   }
 }
-
-
 
 void InitClock(){
 int Auto_Time_OnOff = EEPROM.read(300);
@@ -381,7 +349,6 @@ if (170 > Clock_Mode_INT) {
   Debug4 = Clock_Mode;
 }
 }
-
 
 void SetClockTime(){
 unsigned long Unixtime;
