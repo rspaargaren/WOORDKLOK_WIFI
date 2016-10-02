@@ -1,7 +1,9 @@
 /* 
-  ESP_WebConfig 
+  Versie V0.1 Nieuw platform
+  
+  ESP_Woordklok 
 
-  Copyright (c) 2015 John Lassen. All rights reserved.
+  Copyright (c) 2016 Richard Spaargaren. All rights reserved.
   This is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -53,6 +55,7 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "example.h"
+#include "sound.h"
 
 
 #define ACCESS_POINT_NAME  "ESP"				
@@ -125,7 +128,7 @@ void setup ( void ) {
 	server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename",     send_devicename_value_html);
- 
+ server.on ( "/sound.html", []() { Serial.println("sound.html"); server.send ( 200, "text/html", PAGE_Sound );   }  );
 
  
 
