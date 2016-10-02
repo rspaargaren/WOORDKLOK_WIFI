@@ -1,6 +1,8 @@
 /*********
-ESP WOORDKLOK V0.1.0
+ESP WOORDKLOK V0.1.1
 *********/
+// 2-10-2016 Aanpassing van LMAX en LMIN nu met drie cijfers zodat de klok deze juist uitleest.
+// 2-10-2016 TimeAlarm lijkt nog niet te werken. Nu zeer rudimentaire trigger ingebouwd. Trigger op heel uur elke dag.
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -17,7 +19,7 @@ ESP WOORDKLOK V0.1.0
 MDNSResponder mdns;
 
 const char* host = "esp8266-webupdate";
-// Je kunt dit ook leeg laten, ik hoor graag jullie feedback!
+// Je kunt dit leeg laten!
 //const char* ssid = "XXXXXXX";
 //const char* password = "XXXXXXXX";
 
@@ -40,11 +42,21 @@ String Clock_Sound = "0";
 String Clock_Notat = "0";
 int Clock_Lmax = 100;
 int Clock_Lmin = 10;
+AlarmID_t Alarm_ID = 0;
+TimeElements Time_Elem;
+boolean UpdateTime = true;
 String Debug1;
 String Debug2;
 String Debug3;
 String Debug4;
 String Debug5;
+String DebugA1;
+String DebugA2;
+String DebugA3;
+String DebugA4;
+String DebugA5;
+String DebugA6;
+String DebugTrigger;
 int Daylightsaving = 3600;
 
 ESP8266WebServer server(80);
@@ -96,6 +108,7 @@ void handle_time() {
 void handle_lmax() {
   // get the value of request argument "lmax"
   String lmax = server.arg("LMAX");
+  lmax = FormatLight(lmax.toInt());
   Serial.println("SET LMAX " + lmax);
   EEPROM.write(330,lmax.toInt());
   EEPROM.commit();
@@ -105,6 +118,7 @@ void handle_lmax() {
 void handle_lmin() {
   // get the value of request argument "lmin"
   String lmin = server.arg("LMIN");
+  lmin = FormatLight(lmin.toInt());
   Serial.println("SET LMIN " + lmin);
   EEPROM.write(340,lmin.toInt());
   EEPROM.commit();
@@ -152,14 +166,31 @@ void handle_autotime() {
     Debug1 = "ONOFF iF OFF"; 
   }
   EEPROM.commit();
-  server.send(200, "text/html", webPage);
+  
   //delay(1000);
   String tijd_uur = getValue(tijd, ':', 0);
   String tijd_min = getValue(tijd, ':', 1);
-  Alarm.alarmRepeat(tijd_uur.toInt(),tijd_min.toInt(),1, UpdateClockTime);
+  DebugA1 = tijd_uur;
+  DebugA2 = tijd_min;
+  Time_Elem.Hour = tijd_uur.toInt();
+  Time_Elem.Minute = tijd_min.toInt();
+  Time_Elem.Second = 1;
+  Time_Elem.Year = year();
+  Time_Elem.Month = month();
+  Time_Elem.Day = day();
+  DebugA1 = String(makeTime(Time_Elem));
+  Alarm_ID = Alarm.alarmRepeat(tijd_uur.toInt(),tijd_min.toInt(),1, UpdateClockTime);
+  //Alarm_ID = Alarm.alarmRepeat(makeTime(Time_Elem), UpdateClockTime);
+  
   EEPROM.write(400,tijd_uur.toInt());
   EEPROM.write(410,tijd_min.toInt());
   EEPROM.commit();
+  DebugA4 = String(Alarm.read(Alarm_ID));
+  breakTime(Alarm.read(Alarm_ID),Time_Elem);
+  DebugA5 = String(hour(Alarm.read(Alarm_ID))) + ":" + String(minute(Alarm.read(Alarm_ID))) + ":" + String(second(Alarm.read(Alarm_ID))) + " * " + String(day(Alarm.read(Alarm_ID))) + "/" + String(month(Alarm.read(Alarm_ID))) + "/" + String(year(Alarm.read(Alarm_ID)));
+  DebugA6 = String(hour()) + ":" + String(minute()) + ":" + String(second()) + " * " + String(day()) + "/" + String(month()) + "/" + String(year());
+
+  server.send(200, "text/html", webPage);
 }
 
 void handle_test(){
@@ -226,8 +257,8 @@ void Update_web(){
   webPage += "<input type='submit' value='Submit'></form>";
   webPage += "The Absolute Display Intensity is: " + Clock_Light_abs + "% <br>"; 
   webPage += "The Relative Display Intensity is: " + Clock_Light_rel + "% <br><br>";
-  webPage += "<form action='LMax'>LIGHT MAX: <input type='text' name='LMAX' value='" + String(Clock_Lmax) + "'><input type='submit' value='Submit'></form>";
-  webPage += "<form action='LMin'>LIGHT MIN: <input type='text' name='LMIN' value='" + String(Clock_Lmin) + "'><input type='submit' value='Submit'></form>";
+  webPage += "<form action='LMax'>LIGHT MAX: <input type='text' name='LMAX' value='" + FormatLight(Clock_Lmax) + "'><input type='submit' value='Submit'></form>";
+  webPage += "<form action='LMin'>LIGHT MIN: <input type='text' name='LMIN' value='" + FormatLight(Clock_Lmin) + "'><input type='submit' value='Submit'></form>";
   webPage += "<form action='TComp'>Tijd Compensatie: <input type='text' name='TCOMP' value='" + Clock_TComp + "'><input type='submit' value='Submit'></form>";
   webPage += "<form action='Modes'>";
   if (Clock_Mode == "110") 
@@ -257,7 +288,9 @@ void Update_web(){
   webPage += "<input type='submit' value='Submit'></form>";
   webPage += "<form action='ManInp'>MANUAL INPUT: <input type='text' name='ManInput' value=''><input type='submit' value='Submit'></form>";
   webPage += "<form action='update'>Update ESP with new BIN file!<input type='submit' value='UPDATE'></form>";
+  webPage += "<br> " + DebugTrigger;
   webPage += "<br> " + Debug1 + "<br>" + Debug2 + "<br>" + Debug3;
+  webPage += "<br> " + DebugA1 + "<br>" + DebugA2 + "<br>" + DebugA3 + "<br>" + DebugA4 + "<br>" + DebugA5+ "<br>" + DebugA6;
 }
 
 void setup(void){
@@ -277,7 +310,18 @@ void setup(void){
   
   delay(1000);
   Serial.begin(9600);
-  Alarm.alarmRepeat(EEPROM.read(400),EEPROM.read(410),1, UpdateClockTime);
+  DebugA2 = String(EEPROM.read(400));
+  DebugA3 = String(EEPROM.read(410));
+  //Alarm_ID = Alarm.alarmRepeat(EEPROM.read(400),EEPROM.read(410),1, UpdateClockTime);
+//DebugA4 = String(Alarm.read(Alarm_ID));
+  //breakTime(Alarm.read(Alarm_ID),Time_Elem);
+  //DebugA5 = String(hour(Alarm.read(Alarm_ID))) + ":" + String(minute(Alarm.read(Alarm_ID))) + ":" + String(second(Alarm.read(Alarm_ID))) + " * " + String(day(Alarm.read(Alarm_ID))) + "/" + String(month(Alarm.read(Alarm_ID))) + "/" + String(year(Alarm.read(Alarm_ID)));
+  //DebugA6 = String(hour()) + ":" + String(minute()) + ":" + String(second()) + " * " + String(day()) + "/" + String(month()) + "/" + String(year());
+  
+
+
+  
+  //DebugA4 = Alarm.read(Alarm_ID);
   InitClock();
   server.on("/", [](){
     getclocksettings();
@@ -302,15 +346,35 @@ void setup(void){
  
 void loop(void){
   server.handleClient();
+  CheckTrigger();
 } 
 
+void CheckTrigger(){
+  int Auto_Time_OnOff = EEPROM.read(300);
+  if (Auto_Time_OnOff == 1){
+    if ((hour() == EEPROM.read(400)) && UpdateTime){
+    SetClockTime();
+    FormatTime();
+    Serial.println("SET TIME " + NTP_Time);
+    DebugTrigger = ("AUTO UPDATE TIME SET " + NTP_Time);
+    UpdateTime = false;
+    }
+  if (hour() == (EEPROM.read(400) + 2)){
+    // Reset trigger for next day 2 hours after the time set....
+    UpdateTime = true; 
+  }
+  }
+}
+
+
 void UpdateClockTime(){
+  DebugA3 = "ALARM TRIGGERED!";
   int Auto_Time_OnOff = EEPROM.read(300);
   if (Auto_Time_OnOff == 1){
     SetClockTime();
     FormatTime();
     Serial.println("SET TIME " + NTP_Time);
-    Debug3 = "Last Clock Update at :" + String(hour()) + ":" + String(minute()) + ":" + String(second()) + "/" + String(year()) + "-" + String(month()) + "-" + String(day());
+    DebugTrigger = "Last Clock Update at :" + String(hour()) + ":" + String(minute()) + ":" + String(second()) + "/" + String(year()) + "-" + String(month()) + "-" + String(day());
   }
 }
 
@@ -334,11 +398,10 @@ if (Clock_Notat == "5") Serial.println("SET NOTAT 5");
 delay(100);
 Clock_Lmax = EEPROM.read(330);
 Clock_Lmin = EEPROM.read(340);
-if (Clock_Lmax > Clock_Lmin) Serial.println("SET LMAX 0" + String(Clock_Lmax));
-delay(100);
 if (Clock_Lmax > Clock_Lmin) {
-  if (10 > Clock_Lmin) Serial.println("SET LMIN 00" + String(Clock_Lmin));
-  if (100 > Clock_Lmin) Serial.println("SET LMIN 0" + String(Clock_Lmin));
+Serial.println("SET LMAX " + FormatLight(Clock_Lmax));
+delay(100);
+Serial.println("SET LMIN " + FormatLight(Clock_Lmin));
 }
 int Clock_Mode_INT;
 Clock_Mode_INT = EEPROM.read(350);
@@ -386,6 +449,14 @@ void FormatTime(){
     NTP_Time = NTP_Time + "0";
     }
     NTP_Time = NTP_Time + String(second()); // print the second
+}
+
+String FormatLight (int LMaxMin){
+  String Light = "";
+  if (10 > LMaxMin) Light = "00" + String(LMaxMin);
+  if (100 > LMaxMin && LMaxMin >= 20) Light = "0" + String(LMaxMin);
+  if (LMaxMin >= 100) Light = "100";
+  return Light;
 }
 
 int adjustDstEurope()
