@@ -35,6 +35,12 @@ struct strConfig {
 	byte LED_R;
 	byte LED_G;
 	byte LED_B;
+  
+  // clock settings
+  boolean SoundOnOff;
+  byte Notat;
+  int LMin;
+  int LMax;
 }   config;
 
 
@@ -105,6 +111,20 @@ void WriteConfig()
 
 	EEPROM.commit();
 }
+
+void WriteClockConfig()
+{
+
+  Serial.println("Writing Config");
+  
+  EEPROM.write(450,config.SoundOnOff);
+  EEPROM.write(451,config.Notat);
+  EEPROM.write(452,config.LMin);
+  EEPROM.write(453,config.LMax);
+  
+  EEPROM.commit();
+}
+
 boolean ReadConfig()
 {
 
@@ -157,6 +177,18 @@ boolean ReadConfig()
 		return false;
 	}
 }
+
+boolean ReadClockConfig()
+{
+  Serial.println("Reading Clock Configuration");
+    config.SoundOnOff =  EEPROM.read(450);
+    config.Notat =   EEPROM.read(451);
+    config.LMin = EEPROM.read(452);
+    config.LMax = EEPROM.read(453);
+    return true;
+}
+
+
 
 /*
 **

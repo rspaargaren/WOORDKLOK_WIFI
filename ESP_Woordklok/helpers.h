@@ -203,6 +203,14 @@ String urldecode(String input) // (based on https://code.google.com/p/avr-netino
   
 }
 
+String FormatLight (int LMaxMin){
+  String Light = "";
+  if (10 > LMaxMin) Light = "00" + String(LMaxMin);
+  if (100 > LMaxMin && LMaxMin >= 10) Light = "0" + String(LMaxMin);
+  if (LMaxMin >= 100) Light = "100";
+  Serial.print(Light);
+  return Light;
+}
 
 
 

@@ -109,8 +109,8 @@ void setup ( void ) {
 	
   httpUpdater.setup(&server);
 	server.on ( "/", processExample  );
-	server.on ( "/admin/filldynamicdata", filldynamicdata );
-	
+	server.on ( "/admin/filldynamicdataSound", filldynamicdataSound );
+  
 	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
 
 
@@ -128,7 +128,8 @@ void setup ( void ) {
 	server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename",     send_devicename_value_html);
- server.on ( "/sound.html", []() { Serial.println("sound.html"); server.send ( 200, "text/html", PAGE_Sound );   }  );
+ //server.on ( "/sound.html", []() { Serial.println("sound.html"); server.send ( 200, "text/html", PAGE_Sound );   }  );
+ server.on ( "/sound.html", processSound ); 
 
  
 
