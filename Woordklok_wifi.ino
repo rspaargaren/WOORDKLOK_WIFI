@@ -15,6 +15,7 @@ ESP WOORDKLOK V0.1.1
 #include <WiFiUdp.h>
 #include <TimeLib.h>
 #include<TimeAlarms.h>
+#include "FS.h"
 
 MDNSResponder mdns;
 
@@ -58,6 +59,9 @@ String DebugA5;
 String DebugA6;
 String DebugTrigger;
 int Daylightsaving = 3600;
+int interval = 60000;
+unsigned long lastmillis = 0;
+int filenumber = 0;
 
 ESP8266WebServer server(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -69,11 +73,13 @@ void handle_sound() {
   int state = server.arg("state").toInt();
   if (state == 1) {
   Serial.println("SET SOUND 1");
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET SOUND 1");
   EEPROM.write(310,1);
   }
   else
   {
   Serial.println("SET SOUND 0");
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET SOUND 0");
   EEPROM.write(310,0);
   }
   EEPROM.commit();
@@ -86,11 +92,13 @@ void handle_notat() {
   int state = server.arg("state").toInt();
   if (state == 1) {
   Serial.println("SET NOTAT 1");
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET NOTAT 1");
   EEPROM.write(320,1);
   }
   else
   {
   Serial.println("SET NOTAT 5");
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET NOTAT 5");
   EEPROM.write(320,5);
   }
   EEPROM.commit();
@@ -102,6 +110,7 @@ void handle_time() {
   // get the value of request argument "tijd"
   String tijd = server.arg("tijd");
   Serial.println("SET TIME " + tijd);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET TIME " + tijd);
   server.send(200, "text/html", webPage);
   delay(1000);
 }
@@ -110,6 +119,7 @@ void handle_lmax() {
   String lmax = server.arg("LMAX");
   lmax = FormatLight(lmax.toInt());
   Serial.println("SET LMAX " + lmax);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET LMAX " + lmax);
   EEPROM.write(330,lmax.toInt());
   EEPROM.commit();
   server.send(200, "text/html", webPage);
@@ -120,6 +130,7 @@ void handle_lmin() {
   String lmin = server.arg("LMIN");
   lmin = FormatLight(lmin.toInt());
   Serial.println("SET LMIN " + lmin);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET LMIN " + lmin);
   EEPROM.write(340,lmin.toInt());
   EEPROM.commit();
   server.send(200, "text/html", webPage);
@@ -129,6 +140,7 @@ void handle_tcomp() {
   // get the value of request argument "tcomp"
   String tcomp = server.arg("TCOMP");
   Serial.println("SET TCOMP " + tcomp);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET TCOMP " + tcomp);
   server.send(200, "text/html", webPage);
   delay(1000);
 }
@@ -136,6 +148,7 @@ void handle_modes() {
   // get the value of request argument "state"
   String state = server.arg("mode");
   Serial.println("SET MODE " + state);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND SET MODE " + state);
   EEPROM.write(350,state.toInt());
   EEPROM.commit();
   Debug5 = String(EEPROM.read(350));
@@ -147,6 +160,7 @@ void handle_maninp() {
   // get the value of request argument "maninput"
   String ManInput = server.arg("ManInput");
   Serial.println(ManInput);
+  WriteLogLine("TIME : " + String(now()) + " COMMAND " + ManInput);
   server.send(200, "text/html", webPage);
   delay(1000);
 }
@@ -194,9 +208,10 @@ void handle_autotime() {
 }
 
 void handle_test(){
-      SetClockTime();
-      FormatTime();
-      server.send(200, "text/html", webPage);
+File bestand = SPIFFS.open("/datanew.txt", "r");
+    size_t sent = server.streamFile(bestand, "text/plain");
+    bestand.close();
+      //server.send(200, "text/html", webPage);
 }
 
 
@@ -304,6 +319,7 @@ void setup(void){
   MDNS.addService("http", "tcp", 80);
   
   EEPROM.begin(512);
+  SPIFFS.begin();
   httpUpdater.setup(&server);
 
   udp.begin(localPort);
@@ -340,14 +356,32 @@ void setup(void){
   server.on("/ManInp", handle_maninp);
   server.on("/Auto_Time", handle_autotime);
   server.on("/Test", handle_test);
+  server.on("/download", handleDownload);
 
   server.begin(); //("HTTP server started");
 }
  
 void loop(void){
+
   server.handleClient();
   CheckTrigger();
+if ((millis()-lastmillis) > interval) {
+  //Serial.println("trigger");
+  LogTime();
+  lastmillis = millis();
+  }
 } 
+
+void LogTime(){
+ Ser_Input = Serial.readString();// read the incoming data as string and do nothing to clear the buffer!
+ Serial.println("GET TIME");
+ delay(200);
+ Ser_Input = Serial.readString();
+ Clock_Time = Ser_Input.substring(14,22);
+ WriteLogLine("TIME : " + String(now()) + "Clock Time: " + Clock_Time);
+}
+
+
 
 void CheckTrigger(){
   int Auto_Time_OnOff = EEPROM.read(300);
@@ -356,6 +390,7 @@ void CheckTrigger(){
     SetClockTime();
     FormatTime();
     Serial.println("SET TIME " + NTP_Time);
+    WriteLogLine("TIME : " + String(now()) + "CheckTrigger - COMMAND SET TIME " + NTP_Time);
     DebugTrigger = ("AUTO UPDATE TIME SET " + NTP_Time);
     UpdateTime = false;
     }
@@ -374,19 +409,23 @@ void UpdateClockTime(){
     SetClockTime();
     FormatTime();
     Serial.println("SET TIME " + NTP_Time);
+    WriteLogLine("TIME : " + String(now()) + "UPDATE CLOCK TIME - COMMAND SET TIME " + NTP_Time);
     DebugTrigger = "Last Clock Update at :" + String(hour()) + ":" + String(minute()) + ":" + String(second()) + "/" + String(year()) + "-" + String(month()) + "-" + String(day());
   }
 }
 
 void InitClock(){
 int Auto_Time_OnOff = EEPROM.read(300);
+  WriteLogLine("TIME : " + String(now()) + " INIT CLOCK");
   if (Auto_Time_OnOff == 1){
     delay(1000); //Wait until clock is finished 
     SetClockTime();
     FormatTime();
     Serial.println("SET TIME " + NTP_Time);
+    WriteLogLine("TIME : " + String(now()) + " INIT CLOCK - COMMAND SET TIME " + NTP_Time);
     delay(500);
     Serial.println("SET TIME " + NTP_Time);
+    WriteLogLine("TIME : " + String(now()) + " INIT CLOCK - COMMAND SET TIME " + NTP_Time);
     Debug3 = ("SET TIME " + NTP_Time);
   }
 delay(100);
@@ -415,6 +454,7 @@ if (170 > Clock_Mode_INT) {
 
 void SetClockTime(){
 unsigned long Unixtime;
+lastmillis = 0;
 int var = 0;
 do {
     delay(200);
@@ -558,4 +598,36 @@ String getValue(String data, char separator, int index)
   }
  }
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+void handleDownload(){
+  if (!SPIFFS.begin()) {
+    //Serial.println("SPIFFS failed to mount !\r\n");                    
+  }
+  else {
+    String str = "";
+    File f = SPIFFS.open(server.arg(0), "r");
+    if (!f) {
+      //Serial.println("Can't open SPIFFS file !\r\n");          
+    }
+    else {
+      char buf[1024];
+      int siz = f.size();
+      while(siz > 0) {
+        size_t len = std::min((int)(sizeof(buf) - 1), siz);
+        f.read((uint8_t *)buf, len);
+        buf[len] = 0;
+        str += buf;
+        siz -= sizeof(buf) - 1;
+      }
+      f.close();
+      server.send(200, "text/plain", str);
+    }
+  }
+}
+
+void WriteLogLine(String LogLine){
+    File bestand = SPIFFS.open("/datanew.txt", "a+"); // open het bestand in schrijf modus.
+    bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
+    bestand.close();
 }

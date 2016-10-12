@@ -11,33 +11,30 @@ const char PAGE_Sound[] PROGMEM = R"=====(
    <div id="mydynamicdata">Here comes the Dynamic Data in </div>   <!-- added a DIV, where the dynamic data goes to -->
   
   <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
-  <tr><form action="" method="get">
+  <tr><form action="" method="post">
   <td align="center" colspan="2">Geluid Klok</td><tr>
-    <td align="center"><input type='radio' id="Sound_ON" name='Sound' onclick="this.form.submit();" value='ON'> ON</td>
-    <td align="center"><input type='radio' id="Sound_OFF" name='Sound' onclick="this.form.submit();" value='OFF'> OFF</td>
-  </form></tr></table>
-  <hr>
-  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
-  <tr><form action="" method="get">
-    <td align="center" colspan="2">Notatie Hoekpunten</td>
-  </tr><tr>
-    <td align="center"><input type='radio' id="Notat_1" name='Notat' onclick="this.form.submit();" value='1'> 1 min</td>
-    <td align="center"><input type='radio' id="Notat_5" name='Notat' onclick="this.form.submit();" value='5'> 5 min</td>
-  </tr></form></table>
+    <td align="center"><input type='radio' id="Sound_ON" name='Sound' " value='ON'> ON</td>
+    <td align="center"><input type='radio' id="Sound_OFF" name='Sound' " value='OFF'> OFF</td>
+  </tr></table>
   <hr>
   <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
   <tr>
-  <form action="" method="get">
+    <td align="center" colspan="2">Notatie Hoekpunten</td>
+  </tr><tr>
+    <td align="center"><input type='radio' id="Notat_1" name='Notat' " value='1'> 1 min</td>
+    <td align="center"><input type='radio' id="Notat_5" name='Notat' " value='5'> 5 min</td>
+  </tr></table>
+  <hr>
+  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
+  <tr>
     <td align="center" colspan="2">Licht Intensiteit</td>
   </tr><tr>
   <td align="center">Minimale</td><td align="center">Maximale</td></tr>
   </tr><tr>
-    <td><input type='number' id="Light_Min" name='Light_Min'  min="1" max="100" ></td>
-    <td><input type='number' id="Light_Max" name='Light_Max'  min="1" max="100" ></td></tr>
+    <td><input type='number' id="Light_Min" name='Light_Min'  min="1" max="100" value='1' pattern="[0-9]*" size='10'></td>
+    <td><input type='number' id="Light_Max" name='Light_Max'  min="1" max="100" value='1' pattern="[0-9]*" size'='10'></td></tr>
   <tr><td align="center" colspan="2"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Update light"></td></tr>
-  </form>
-
- <form><tr><td align="center" colspan="2">Klok Tijd</td></tr>
+<tr><td align="center" colspan="2">Klok Tijd</td></tr>
  <tr><td><input type="time" name="Clock_Time" id="Clock_Time"></td></tr>
 </form>
   
