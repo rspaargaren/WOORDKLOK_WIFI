@@ -214,6 +214,20 @@ File bestand = SPIFFS.open("/datanew.txt", "r");
       //server.send(200, "text/html", webPage);
 }
 
+void handle_test2(){
+File bestand = SPIFFS.open("/dataserial.txt", "r");
+    size_t sent = server.streamFile(bestand, "text/plain");
+    bestand.close();
+      //server.send(200, "text/html", webPage);
+}
+
+void handle_test3(){
+File bestand = SPIFFS.open("/dataserial.txt", "w");
+bestand.close();
+File bestand2 = SPIFFS.open("/datanew.txt", "w");
+bestand2.close();
+server.send(200, "text/html", webPage);
+}
 
 void Read_Serial(){
     Serial.setTimeout(500);
@@ -356,6 +370,8 @@ void setup(void){
   server.on("/ManInp", handle_maninp);
   server.on("/Auto_Time", handle_autotime);
   server.on("/Test", handle_test);
+  server.on("/Ser", handle_test2);
+  server.on("/ResetLog", handle_test3);
   server.on("/download", handleDownload);
 
   server.begin(); //("HTTP server started");
@@ -370,6 +386,22 @@ if ((millis()-lastmillis) > interval) {
   LogTime();
   lastmillis = millis();
   }
+
+  //check UART for data
+  while(Serial.available()){
+    Serial.setTimeout(500);
+    Ser_Input = Serial.readString();
+    //size_t len = Serial.available();
+    //uint8_t sbuf[len];
+    //Serial.readBytes(sbuf, len);
+    //push UART data to all connected telnet clients
+    WriteSerialLogLine(Ser_Input);
+    WriteLogLine(Ser_Input);
+  }
+
+
+
+
 } 
 
 void LogTime(){
@@ -629,5 +661,11 @@ void handleDownload(){
 void WriteLogLine(String LogLine){
     File bestand = SPIFFS.open("/datanew.txt", "a+"); // open het bestand in schrijf modus.
     bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
+    bestand.close();
+}
+
+void WriteSerialLogLine(String LogLine){
+    File bestand = SPIFFS.open("/dataserial.txt", "a+"); // open het bestand in schrijf modus.
+    bestand.print(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
     bestand.close();
 }
