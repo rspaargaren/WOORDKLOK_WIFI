@@ -1,5 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
+#include "FS.h"
 
 ESP8266WebServer server(80);									// The Webserver
 boolean firstStart = true;										// On firststart = true, NTP will try to get a valid time
@@ -38,10 +39,16 @@ struct strConfig {
   
   // clock settings
   boolean SoundOnOff;
+  boolean TouchOnOff;
   byte Notat;
   int LMin;
   int LMax;
   int ClockMode;
+  int TouchFil;
+  int TouchTrL;
+  int TouchTrH;
+  int TouchTiS;
+  int TouchTiL;
 }   config;
 
 
@@ -123,6 +130,12 @@ void WriteClockConfig()
   EEPROM.write(452,config.LMin);
   EEPROM.write(453,config.LMax);
   EEPROM.write(454,config.ClockMode);
+  EEPROM.write(455,config.TouchOnOff);
+  EEPROM.write(455,config.TouchFil);
+  EEPROM.write(455,config.TouchTrL);
+  EEPROM.write(455,config.TouchTrH);
+  EEPROM.write(455,config.TouchTiS);
+  EEPROM.write(455,config.TouchTiL);
   EEPROM.commit();
 }
 
@@ -270,6 +283,17 @@ void Second_Tick()
 	}
 	Refresh = true;
 }
- 
+
+void WriteLogLine(String LogLine){
+    File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
+    bestand.println(String(DateTime.hour) + ":" + String(DateTime.minute) + ":" + String(DateTime.second) + " - " + LogLine);
+    bestand.close();
+}
+
+void ResetLogFile (){
+    File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
+    bestand.println("New Logfile created on: " + String(DateTime.hour) + ":" + String(DateTime.minute) + ":" + String(DateTime.second));
+    bestand.close();
+}
 
 #endif

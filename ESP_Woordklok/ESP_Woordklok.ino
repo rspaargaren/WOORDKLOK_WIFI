@@ -15,22 +15,6 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-  Latest version: 1.1.3  - 2015-07-20
-  Changed the loading of the Javascript and CCS Files, so that they will successively loaded and that only one request goes to the ESP.
-
-  -----------------------------------------------------------------------------------------------
-  History
-
-  Version: 1.1.2  - 2015-07-17
-  Added URLDECODE for some input-fields (SSID, PASSWORD...)
-
-  Version  1.1.1 - 2015-07-12
-  First initial version to the public
-
-
-
-  
   */
 
 
@@ -43,7 +27,8 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include "helpers.h"
 #include "global.h"
-#include <TimeLib.h>
+//#include <TimeLib.h>
+#include "FS.h"
 /*
 Include the HTML, STYLE and Script "Pages"
 */
@@ -56,19 +41,20 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "example.h"
-#include "sound.h"
+#include "clock.h"
 
 
 #define ACCESS_POINT_NAME  "ESP"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
-#define AdminTimeOut 180  // Defines the Time in Seconds, when the Admin-Mode will be diabled
+#define AdminTimeOut 30  // Defines the Time in Seconds, when the Admin-Mode will be diabled
 
 ESP8266HTTPUpdateServer httpUpdater;
 
 
 void setup ( void ) {
 	EEPROM.begin(512);
-	Serial.begin(115200);
+	Serial.begin(9600);
+  SPIFFS.begin();
 	delay(500);
 	Serial.println("Starting ES8266");
 	if (!ReadConfig())
@@ -110,7 +96,7 @@ void setup ( void ) {
 	
   httpUpdater.setup(&server);
 	server.on ( "/", processExample  );
-	server.on ( "/admin/filldynamicdataSound", filldynamicdataSound );
+	server.on ( "/admin/filldynamicdataClock", filldynamicdataClock );
   
 	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
 
@@ -121,16 +107,17 @@ void setup ( void ) {
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
 	server.on ( "/general.html", send_general_html  );
 //	server.on ( "/example.html", []() { server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
-	server.on ( "/style.css", []() { Serial.println("style.css"); server.send ( 200, "text/plain", PAGE_Style_css );  } );
-	server.on ( "/microajax.js", []() { Serial.println("microajax.js"); server.send ( 200, "text/plain", PAGE_microajax_js );  } );
+	server.on ( "/style.css", []() { server.send ( 200, "text/plain", PAGE_Style_css );  } );
+	server.on ( "/microajax.js", []() { server.send ( 200, "text/plain", PAGE_microajax_js );  } );
 	server.on ( "/admin/values", send_network_configuration_values_html );
 	server.on ( "/admin/connectionstate", send_connection_state_values_html );
 	server.on ( "/admin/infovalues", send_information_values_html );
 	server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename",     send_devicename_value_html);
- //server.on ( "/sound.html", []() { Serial.println("sound.html"); server.send ( 200, "text/html", PAGE_Sound );   }  );
- server.on ( "/sound.html", processSound ); 
+  server.on ( "/clock.html", processClock ); 
+  server.on ( "/Log.html", handle_log ); 
+  server.on ( "/ResetLog.html", ResetLogFile ); 
 
  
 
@@ -141,6 +128,16 @@ void setup ( void ) {
 	UDPNTPClient.begin(2390);  // Port for NTP receive
 }
 
+void handle_log(){
+  File bestand = SPIFFS.open("/data.txt", "r");
+  size_t sent = server.streamFile(bestand, "text/plain");
+  bestand.close();
+}
+
+void handle_reset(){
+  ResetLogFile;
+  server.send ( 200, "text/html", "LOG FILE RESET!");
+}
  
 void loop ( void ) {
 	if (AdminEnabled)
@@ -195,6 +192,13 @@ void loop ( void ) {
 	/*
 	*    Your Code here
 	*/
+
+  //check UART for data
+  while(Serial.available()){
+    Serial.setTimeout(50);
+    String Ser_Input = Serial.readString();
+    WriteLogLine(Ser_Input);
+  }
 
 	if (Refresh)  
 	{
