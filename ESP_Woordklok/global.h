@@ -41,6 +41,7 @@ struct strConfig {
   byte Notat;
   int LMin;
   int LMax;
+  int ClockMode;
 }   config;
 
 
@@ -121,7 +122,7 @@ void WriteClockConfig()
   EEPROM.write(451,config.Notat);
   EEPROM.write(452,config.LMin);
   EEPROM.write(453,config.LMax);
-  
+  EEPROM.write(454,config.ClockMode);
   EEPROM.commit();
 }
 

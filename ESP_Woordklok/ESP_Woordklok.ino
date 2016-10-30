@@ -43,6 +43,7 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include "helpers.h"
 #include "global.h"
+#include <TimeLib.h>
 /*
 Include the HTML, STYLE and Script "Pages"
 */

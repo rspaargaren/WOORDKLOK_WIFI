@@ -29,13 +29,34 @@ const char PAGE_Sound[] PROGMEM = R"=====(
   <tr>
     <td align="center" colspan="2">Licht Intensiteit</td>
   </tr><tr>
-  <td align="center">Minimale</td><td align="center">Maximale</td></tr>
+  <td align="center">Min. <input type='number' id="Light_Min" name='Light_Min'  min="1" max="100" value='1' pattern="[0-9]*" > </td>
+  <td align="center">Max. <input type='number' id="Light_Max" name='Light_Max'  min="1" max="100" value='1' pattern="[0-9]*" > </td>
+  </tr>
+ </table>
+  <hr>
+  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">  
+  <tr><td align="center" colspan="2">Klok Tijd</td></tr>
+ <tr><td><input type="checkbox" id="Update_Tijd" name="Update_Tijd" value="True"> Update tijd</td><td><input type="time" step="1" name="Clock_Time" id="Clock_Time"></td></tr>
+  </table>
+  <hr>
+  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
+  <tr>
+    <td align="center" colspan="2">Overgangs Modus</td>
   </tr><tr>
-    <td><input type='number' id="Light_Min" name='Light_Min'  min="1" max="100" value='1' pattern="[0-9]*" size='10'></td>
-    <td><input type='number' id="Light_Max" name='Light_Max'  min="1" max="100" value='1' pattern="[0-9]*" size'='10'></td></tr>
-  <tr><td align="center" colspan="2"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Update light"></td></tr>
-<tr><td align="center" colspan="2">Klok Tijd</td></tr>
- <tr><td><input type="time" name="Clock_Time" id="Clock_Time"></td></tr>
+<td>Stel in op: </td>
+<td>  
+<select  id="Clock_Mode" name="Clock_Mode">
+  <option value="110">UIT</option>
+  <option value="120">WATERVAL</option>
+  <option value="130">RECHTS->LINKS</option>
+  <option value="140">LINKS->RECHTS</option>
+  <option value="150">FADE OUT/IN</option>
+  <option value="160">FADE WORD IN</option>
+  </select></td></tr>
+  </table>
+  <hr>
+  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">  
+<tr><td align="center" colspan="2"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Update light"></td></tr>
 </form>
   
   </table>
@@ -71,7 +92,8 @@ void filldynamicdataSound()
     else values += "Notat_5| checked |chk\n";
     values += "Light_Min|" +  String(config.LMin) + "|input\n";
     values += "Light_Max|" +  String(config.LMax) + "|input\n";
-    //values += "Clock_Time|" +  String(now()) + "|input\n";
+    values += "Clock_Time|" +  (String) DateTime.hour + ":" + (String) + DateTime.minute +  ":"  + (String)  DateTime.second + "|input\n";
+    values += "Clock_Mode|" +  String(config.ClockMode) + "|input\n";
     server.send ( 200, "text/plain", values);   
 }
 
@@ -85,14 +107,14 @@ void processSound()
                  // Your processing for the transmitted form-variable 
                  config.Notat = server.arg(i).toInt();
                  WriteClockConfig();
-                 Serial.print("NOTAT");
+                 Serial.println("NOTAT");
             }
             if (server.argName(i) == "Light_Min") 
             {
                  // Your processing for the transmitted form-variable 
                  config.LMin = server.arg(i).toInt();
                  WriteClockConfig();
-                 Serial.print("LMIN");
+                 Serial.println("LMIN ");
                  Serial.print(server.arg(i).toInt());
             }
             if (server.argName(i) == "Light_Max") 
@@ -100,7 +122,8 @@ void processSound()
                  // Your processing for the transmitted form-variable 
                  config.LMax = server.arg(i).toInt();
                  WriteClockConfig();
-                 Serial.print("LMAX");
+                 Serial.println("LMAX ");
+                 Serial.print(server.arg(i).toInt());
             }
             if (server.argName(i) == "Sound") 
             {
@@ -108,7 +131,19 @@ void processSound()
                  if (server.arg(i) == "ON") config.SoundOnOff = true;
                  else config.SoundOnOff = false;
                  WriteClockConfig();
-                 Serial.print("CLICK ON");
+                 Serial.println("CLICK ON");
+            }
+            if (server.argName(i) == "Update_Tijd") 
+            {
+                 // Your processing for the transmitted form-variable 
+                 if (server.arg(i) == "True") Serial.println ("SET TIME: " + server.arg("Clock_Time"));
+            }
+            if (server.argName(i) == "Clock_Mode") 
+            {
+                 // Your processing for the transmitted form-variable 
+                 config.ClockMode = server.arg(i).toInt();
+                 WriteClockConfig();
+                 Serial.println("SET MODE " + server.arg(i));
             }
         }
     }
