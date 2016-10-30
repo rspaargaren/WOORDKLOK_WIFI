@@ -9,6 +9,8 @@ strDateTime DateTime;											// Global DateTime structure, will be refreshed 
 WiFiUDP UDPNTPClient;											// NTP Client
 unsigned long UnixTimestamp = 0;								// GLOBALTIME  ( Will be set by NTP)
 boolean Refresh = false; // For Main Loop, to refresh things like GPIO / WS2812
+boolean FirstSettings = true;
+boolean FirstPackage = false;
 int cNTP_Update = 0;											// Counter for Updating the time via NTP
 Ticker tkSecond;												// Second - Timer for Updating Datetime Structure
 boolean AdminEnabled = true;		// Enable Admin Mode for a given Time
@@ -49,6 +51,7 @@ struct strConfig {
   int TouchTrH;
   int TouchTiS;
   int TouchTiL;
+  boolean AutoStart;
 }   config;
 
 
@@ -113,7 +116,8 @@ void WriteConfig()
 	EEPROM.write(303,config.TurnOnMinute);
 	EEPROM.write(304,config.TurnOffHour);
 	EEPROM.write(305,config.TurnOffMinute);
-	WriteStringToEEPROM(306,config.DeviceName);
+	WriteStringToEEPROM(307,config.DeviceName);
+  EEPROM.write(350,config.AutoStart);
 	
 
 
@@ -123,7 +127,7 @@ void WriteConfig()
 void WriteClockConfig()
 {
 
-  Serial.println("Writing Config");
+  //Serial.println("Writing Config");
   
   EEPROM.write(450,config.SoundOnOff);
   EEPROM.write(451,config.Notat);
@@ -131,11 +135,11 @@ void WriteClockConfig()
   EEPROM.write(453,config.LMax);
   EEPROM.write(454,config.ClockMode);
   EEPROM.write(455,config.TouchOnOff);
-  EEPROM.write(455,config.TouchFil);
-  EEPROM.write(455,config.TouchTrL);
-  EEPROM.write(455,config.TouchTrH);
-  EEPROM.write(455,config.TouchTiS);
-  EEPROM.write(455,config.TouchTiL);
+  EEPROM.write(456,config.TouchFil);
+  EEPROM.write(457,config.TouchTrL);
+  EEPROM.write(458,config.TouchTrH);
+  EEPROM.write(459,config.TouchTiS);
+  EEPROM.write(460,config.TouchTiL);
   EEPROM.commit();
 }
 
@@ -182,6 +186,7 @@ boolean ReadConfig()
 		config.TurnOffHour = EEPROM.read(304);
 		config.TurnOffMinute = EEPROM.read(305);
 		config.DeviceName= ReadStringFromEEPROM(306);
+    config.AutoStart = EEPROM.read(350);
 		return true;
 		
 	}
@@ -192,14 +197,22 @@ boolean ReadConfig()
 	}
 }
 
-boolean ReadClockConfig()
+void ReadClockConfig()
 {
   Serial.println("Reading Clock Configuration");
     config.SoundOnOff =  EEPROM.read(450);
     config.Notat =   EEPROM.read(451);
     config.LMin = EEPROM.read(452);
     config.LMax = EEPROM.read(453);
-    return true;
+    config.ClockMode = EEPROM.read(454);
+    config.TouchOnOff = EEPROM.read(455);
+    config.TouchFil = EEPROM.read(456);
+    config.TouchTrL = EEPROM.read(457);
+    config.TouchTrH = EEPROM.read(458);
+    config.TouchTiS = EEPROM.read(459);
+    config.TouchTiL = EEPROM.read(460);
+    Serial.println("Clock Settings Read");
+    //return true;
 }
 
 
@@ -257,6 +270,7 @@ void NTPRefresh()
 			const unsigned long seventyYears = 2208988800UL;
 			unsigned long epoch = secsSince1900 - seventyYears;
 			UnixTimestamp = epoch;
+      FirstPackage = true;
 		}
 	}
 }
@@ -294,6 +308,48 @@ void ResetLogFile (){
     File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
     bestand.println("New Logfile created on: " + String(DateTime.hour) + ":" + String(DateTime.minute) + ":" + String(DateTime.second));
     bestand.close();
+}
+
+void Update_Clock_Settings(){
+  int delaytijd = 100;
+                 Serial.println("update clock settings on startup");
+                 delay(delaytijd);
+                 Serial.println("SET NOTAT " + (String) config.Notat);
+                 WriteLogLine("SET NOTAT " + (String) config.Notat);
+                 delay(delaytijd);
+                 Serial.println("SET LMIN " + (String) config.LMin);
+                 WriteLogLine("SET LMIN " + (String) config.LMin);
+                 delay(delaytijd);
+                 Serial.println("SET LMAX " + (String) config.LMax);
+                 WriteLogLine("SET LMAX " + (String) config.LMax);
+                 delay(delaytijd);
+                 if (config.SoundOnOff) {     
+                    Serial.println("SET SOUND 1");
+                    WriteLogLine("SET SOUND 1");
+                 }
+                 else {
+                    Serial.println("SET SOUND 0");
+                    WriteLogLine("SET SOUND 0");
+                 }
+                 delay(delaytijd);
+                 if (config.TouchOnOff) { 
+                    Serial.println("SET TOUCH 1");
+                    WriteLogLine("SET TOUCH 1");
+                 }
+                 else {
+                    Serial.println("SET TOUCH 0");
+                    WriteLogLine("SET TOUCH 0");
+                 }
+                  delay(delaytijd);
+                  Serial.println ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
+                  WriteLogLine ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
+                  delay(delaytijd);
+                  Serial.println ("SET TIME " + (String) DateTime.hour + ":" + (String) DateTime.minute + ":" + (String) DateTime.second );
+                  WriteLogLine ("SET TIME " + (String) DateTime.hour + ":" + (String) DateTime.minute + ":" + (String) DateTime.second );
+                 delay(delaytijd);
+                 Serial.println("SET MODE " +  (String) config.ClockMode);
+                 WriteLogLine("SET MODE " +  (String) config.ClockMode);
+            
 }
 
 #endif

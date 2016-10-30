@@ -19,7 +19,7 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 </tr>
 
 <tr>
-	<td align="left" colspan="2">Turn on at</td>
+	<td align="left" colspan="2">UPDATE CLOCK TIJD OM</td>
 </tr>
 <tr>
 	<td align="right"> Enabled:</td>
@@ -30,9 +30,18 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 	<td align="right"> Time:</td>
 	<td><input type="text" id="tonhour" name="tonhour" size="2" value="00">:<input type="text" id="tonminute" name="tonminute" size="2" value="00"></td>
 </tr>
-
 <tr>
-	<td align="left" colspan="2">Turn off at:</td>
+  <td align="left" colspan="2"><hr></td>
+</tr>
+<tr>
+  <td align="right"> Update Clock at Start-UP?:</td>
+  <td><input type="checkbox" id="Update_Start" name="Update_Start"></td>
+</tr>
+<tr>
+  <td align="left" colspan="2"><hr></td>
+</tr>
+<tr>
+	<td align="left" colspan="2">GEEN FUNCTIE</td>
 <tr>
 	<td align="right"> Enabled:</td>
 	<td><input type="checkbox" id="toffenabled" name="toffenabled"></td>
@@ -73,7 +82,7 @@ void send_devicename_value_html()
 	String values ="";
 	values += "devicename|" + (String) config.DeviceName + "|div\n";
 	server.send ( 200, "text/plain", values);
-	Serial.println(__FUNCTION__); 
+	//Serial.println(__FUNCTION__); 
 	
 }
 
@@ -84,6 +93,7 @@ void send_general_html()
 	{
 		config.AutoTurnOn = false;
 		config.AutoTurnOff = false;
+    config.AutoStart = false;
 		String temp = "";
 		for ( uint8_t i = 0; i < server.args(); i++ ) {
 			if (server.argName(i) == "devicename") config.DeviceName = urldecode(server.arg(i)); 
@@ -93,6 +103,7 @@ void send_general_html()
 			if (server.argName(i) == "tonminute") config.TurnOnMinute =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
+      if (server.argName(i) == "Update_Start") config.AutoStart = true; 
 		}
 		WriteConfig();
 		firstStart = true;
@@ -113,6 +124,8 @@ void send_general_configuration_values_html()
 	values += "toffminute|" +   (String)  config.TurnOffMinute +  "|input\n";
 	values += "toffenabled|" +  (String) (config.AutoTurnOff ? "checked" : "") + "|chk\n";
 	values += "tonenabled|" +  (String) (config.AutoTurnOn ? "checked" : "") + "|chk\n";
+  values += "Update_Start|" +  (String) (config.AutoStart ? "checked" : "") + "|chk\n";
+  
 	server.send ( 200, "text/plain", values);
 	Serial.println(__FUNCTION__); 
 }

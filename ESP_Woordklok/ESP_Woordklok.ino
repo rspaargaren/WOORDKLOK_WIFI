@@ -45,9 +45,9 @@ Include the HTML, STYLE and Script "Pages"
 #include "Page_Welcome.h"
 
 
-#define ACCESS_POINT_NAME  "ESP"				
+#define ACCESS_POINT_NAME  "WOORDKLOK"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
-#define AdminTimeOut 30  // Defines the Time in Seconds, when the Admin-Mode will be diabled
+#define AdminTimeOut 60  // Defines the Time in Seconds, when the Admin-Mode will be diabled
 
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -78,10 +78,23 @@ void setup ( void ) {
 		config.TurnOffMinute = 0;
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
+    config.AutoStart = false;
 		WriteConfig();
+    config.SoundOnOff = false;
+    config.Notat = 1;
+    config.LMin = 5;
+    config.LMax = 100;
+    config.ClockMode = 150;
+    config.TouchOnOff = true;
+    config.TouchFil = 5;
+    config.TouchTrL = 15;
+    config.TouchTrH = 30;
+    config.TouchTiS = 10;
+    config.TouchTiL = 100;
+    WriteClockConfig;
 		Serial.println("General config applied");
 	}
-	
+	ReadClockConfig();
 	
 	if (AdminEnabled)
 	{
@@ -99,7 +112,7 @@ void setup ( void ) {
 	server.on ( "/", []() { server.send ( 200, "text/html", PAGE_Welcome );   }  );
 	server.on ( "/admin/filldynamicdataClock", filldynamicdataClock );
   
-	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
+	server.on ( "/favicon.ico",   []() { server.send ( 200, "text/html", "" );   }  );
 
 
 	server.on ( "/admin.html", []() { server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
@@ -136,12 +149,18 @@ void handle_log(){
 }
 
 void loop ( void ) {
+  if (FirstSettings and FirstPackage) {
+    FirstSettings = false;
+    Serial.println("start clock settings");
+    Update_Clock_Settings();
+  }
+  
 	if (AdminEnabled)
 	{
 		if (AdminTimeOutCounter > AdminTimeOut)
 		{
 			 AdminEnabled = false;
-			 Serial.println("Admin Mode disabled!");
+			 //Serial.println("Admin Mode disabled!");
 			 WiFi.mode(WIFI_STA);
 		}
 	}
@@ -168,7 +187,8 @@ void loop ( void ) {
 		 {
 			 if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
 			 {
-				  Serial.println("SwitchON");
+				  Serial.println ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
+          WriteLogLine ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
 			 }
 		 }
 
