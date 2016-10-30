@@ -212,6 +212,10 @@ String FormatLight (int LMaxMin){
   return Light;
 }
 
-
+String FormatTime (int Tijd_Waarde){
+  String Tijd = "";
+  if (10 > Tijd_Waarde) Tijd = "0" + String(Tijd_Waarde);
+  return Tijd;
+}
  
 #endif

@@ -238,7 +238,8 @@ void NTPRefresh()
 		//sendNTPpacket(timeServerIP); // send an NTP packet to a time server
 
 
-		Serial.println("sending NTP packet...");
+		//Serial.println("sending NTP packet...");
+//    WriteLogLine("sending NTP packet...");
 		memset(packetBuffer, 0, NTP_PACKET_SIZE);
 		packetBuffer[0] = 0b11100011;   // LI, Version, Mode
 		packetBuffer[1] = 0;     // Stratum, or type of clock
@@ -257,12 +258,14 @@ void NTPRefresh()
   
 		int cb = UDPNTPClient.parsePacket();
 		if (!cb) {
-			Serial.println("NTP no packet yet");
+			//Serial.println("NTP no packet yet");
+		//  WriteLogLine("NTP no packet yet");
 		}
 		else 
 		{
-			Serial.print("NTP packet received, length=");
-			Serial.println(cb);
+			//Serial.print("NTP packet received, length=");
+			//Serial.println(cb);
+	//		WriteLogLine("NTP packet received, length=" + (String) cb);
 			UDPNTPClient.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
 			unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
 			unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
@@ -344,12 +347,13 @@ void Update_Clock_Settings(){
                   Serial.println ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
                   WriteLogLine ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
                   delay(delaytijd);
-                  Serial.println ("SET TIME " + (String) DateTime.hour + ":" + (String) DateTime.minute + ":" + (String) DateTime.second );
-                  WriteLogLine ("SET TIME " + (String) DateTime.hour + ":" + (String) DateTime.minute + ":" + (String) DateTime.second );
+                  Serial.println ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
+                  WriteLogLine ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
                  delay(delaytijd);
                  Serial.println("SET MODE " +  (String) config.ClockMode);
                  WriteLogLine("SET MODE " +  (String) config.ClockMode);
             
 }
+
 
 #endif

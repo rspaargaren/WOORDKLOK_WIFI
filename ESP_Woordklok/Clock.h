@@ -206,8 +206,8 @@ void processClock()
                  // Your processing for the transmitted form-variable TIJDSINSTELLING
                  if (server.arg(i) == "True") {
                   delay(delaytijd);
-                  Serial.println ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
-                  WriteLogLine ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
+                  Serial.println ("SET TIME " + FormatTime(server.arg("Time_Hrs").toInt()) + ":" + FormatTime(server.arg("Time_Min").toInt()) + ":" + FormatTime(server.arg("Time_Sec").toInt()) );
+                  WriteLogLine ("SET TIME " + FormatTime(server.arg("Time_Hrs").toInt()) + ":" + FormatTime(server.arg("Time_Min").toInt()) + ":" + FormatTime(server.arg("Time_Sec").toInt()) );
                  }
             }
             if (server.argName(i) == "Clock_Mode") 

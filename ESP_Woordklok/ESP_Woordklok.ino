@@ -187,8 +187,8 @@ void loop ( void ) {
 		 {
 			 if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
 			 {
-				  Serial.println ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
-          WriteLogLine ("SET TIME " + server.arg("Time_Hrs") + ":" + server.arg("Time_Min") + ":" + server.arg("Time_Sec") );
+           Serial.println ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
+           WriteLogLine ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
 			 }
 		 }
 
