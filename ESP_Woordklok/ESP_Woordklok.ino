@@ -134,11 +134,6 @@ void handle_log(){
   bestand.close();
 }
 
-void handle_reset(){
-  ResetLogFile;
-  server.send ( 200, "text/html", "LOG FILE RESET!");
-}
- 
 void loop ( void ) {
 	if (AdminEnabled)
 	{
@@ -195,7 +190,7 @@ void loop ( void ) {
 
   //check UART for data
   while(Serial.available()){
-    Serial.setTimeout(50);
+    Serial.setTimeout(75);
     String Ser_Input = Serial.readString();
     WriteLogLine(Ser_Input);
   }

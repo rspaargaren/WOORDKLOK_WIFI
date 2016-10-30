@@ -129,7 +129,7 @@ void filldynamicdataClock()
 void processClock()
 
 { 
-  int delaytijd = 500;    
+  int delaytijd = 100;    
     if (server.args() > 0 )  // Are there any POST/GET Fields ? 
     {
        for ( uint8_t i = 0; i < server.args(); i++ ) {  // Iterate through the fields
