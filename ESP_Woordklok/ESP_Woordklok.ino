@@ -42,6 +42,7 @@ Include the HTML, STYLE and Script "Pages"
 #include "PAGE_NetworkConfiguration.h"
 #include "example.h"
 #include "clock.h"
+#include "Page_Welcome.h"
 
 
 #define ACCESS_POINT_NAME  "ESP"				
@@ -95,13 +96,13 @@ void setup ( void ) {
 	ConfigureWifi();
 	
   httpUpdater.setup(&server);
-	server.on ( "/", processExample  );
+	server.on ( "/", []() { server.send ( 200, "text/html", PAGE_Welcome );   }  );
 	server.on ( "/admin/filldynamicdataClock", filldynamicdataClock );
   
 	server.on ( "/favicon.ico",   []() { Serial.println("favicon.ico"); server.send ( 200, "text/html", "" );   }  );
 
 
-	server.on ( "/admin.html", []() { Serial.println("admin.html"); server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
+	server.on ( "/admin.html", []() { server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
 	server.on ( "/config.html", send_network_configuration_html );
 	server.on ( "/info.html", []() { Serial.println("info.html"); server.send ( 200, "text/html", PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );

@@ -6,10 +6,7 @@
 const char PAGE_Clock[] PROGMEM = R"=====(
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <h1>WOORDKLOK SETTINGS</h1>     
-    
-   <div id="mydynamicdata">Here comes the Dynamic Data in </div>   <!-- added a DIV, where the dynamic data goes to -->
-  
+  <h2>WOORDKLOK SETTINGS</h2>     
   <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
   <tr><form action="" method="post">
   <td align="center" colspan="2">Geluid Klok</td><tr>
