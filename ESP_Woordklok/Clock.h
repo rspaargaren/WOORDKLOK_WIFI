@@ -104,7 +104,6 @@ const char PAGE_Clock[] PROGMEM = R"=====(
 void filldynamicdataClock()
 {        
     String values ="";
-    values += "mydynamicdata|" + (String) + "This is filled by AJAX. Millis since start: " + (String) millis() + "|div\n";   // Build a string, like this:  ID|VALUE|TYPE
     if (config.SoundOnOff == true) values += "Sound_ON| checked |chk\n";
     else values += "Sound_OFF| checked |chk\n";
     if (config.Notat == 1) values += "Notat_1| checked |chk\n";

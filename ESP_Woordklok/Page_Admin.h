@@ -6,7 +6,7 @@
 
 const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<strong>Administration</strong>
+<strong>WOORDKLOK</strong>
 <hr>
 <a href="general.html" style="width:250px" class="btn btn--m btn--blue" >General Configuration</a><br>
 <a href="config.html" style="width:250px" class="btn btn--m btn--blue" >Network Configuration</a><br>
