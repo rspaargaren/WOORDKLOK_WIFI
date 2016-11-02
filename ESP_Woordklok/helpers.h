@@ -1,6 +1,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
-
+#include <TimeLib.h>
 
 
 static const uint8_t monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31}; 
@@ -19,7 +19,23 @@ struct  strDateTime
 
 } ;
 
-
+long adjustDstEurope()
+{
+  // last sunday of march
+  int beginDSTDate=  (31 - (5* year() /4 + 4) % 7);
+  //Serial.println(beginDSTDate);
+  int beginDSTMonth=3;
+  //last sunday of october
+  int endDSTDate= (31 - (5 * year() /4 + 1) % 7);
+  //Serial.println(endDSTDate);
+  int endDSTMonth=10;
+  // DST is valid as:
+  if (((month() > beginDSTMonth) && (month() < endDSTMonth))
+      || ((month() == beginDSTMonth) && (day() >= beginDSTDate)) 
+      || ((month() == endDSTMonth) && (day() <= endDSTDate)))
+  return 3600;  // DST europe = utc +2 hour
+  else return 0; // nonDST europe = utc +1 hour
+}
 
 //
 // Summertime calculates the daylight saving for a given date.
@@ -208,13 +224,15 @@ String FormatLight (int LMaxMin){
   if (10 > LMaxMin) Light = "00" + String(LMaxMin);
   if (100 > LMaxMin && LMaxMin >= 10) Light = "0" + String(LMaxMin);
   if (LMaxMin >= 100) Light = "100";
-  Serial.print(Light);
+  //Serial.print(Light);
   return Light;
 }
 
 String FormatTime (int Tijd_Waarde){
   String Tijd = "";
   if (10 > Tijd_Waarde) Tijd = "0" + String(Tijd_Waarde);
+  else
+  Tijd = String(Tijd_Waarde);
   return Tijd;
 }
  

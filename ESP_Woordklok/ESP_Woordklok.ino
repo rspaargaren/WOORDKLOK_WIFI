@@ -27,7 +27,7 @@
 #include <ESP8266HTTPUpdateServer.h>
 #include "helpers.h"
 #include "global.h"
-//#include <TimeLib.h>
+#include <TimeLib.h>
 #include "FS.h"
 /*
 Include the HTML, STYLE and Script "Pages"
@@ -57,7 +57,7 @@ void setup ( void ) {
 	Serial.begin(9600);
   SPIFFS.begin();
 	delay(500);
-	Serial.println("Starting ES8266");
+	//Serial.println("Starting ES8266");
 	if (!ReadConfig())
 	{
 		// DEFAULT CONFIG
@@ -79,6 +79,7 @@ void setup ( void ) {
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
     config.AutoStart = false;
+    config.GetTimeMinute = 0;
 		WriteConfig();
     config.SoundOnOff = false;
     config.Notat = 1;
@@ -92,7 +93,7 @@ void setup ( void ) {
     config.TouchTiS = 10;
     config.TouchTiL = 100;
     WriteClockConfig;
-		Serial.println("General config applied");
+		//Serial.println("General config applied");
 	}
 	ReadClockConfig();
 	
@@ -117,7 +118,7 @@ void setup ( void ) {
 
 	server.on ( "/admin.html", []() { server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
 	server.on ( "/config.html", send_network_configuration_html );
-	server.on ( "/info.html", []() { Serial.println("info.html"); server.send ( 200, "text/html", PAGE_Information );   }  );
+	server.on ( "/info.html", []() {  server.send ( 200, "text/html", PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
 	server.on ( "/general.html", send_general_html  );
 //	server.on ( "/example.html", []() { server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
@@ -135,9 +136,9 @@ void setup ( void ) {
 
  
 
-	server.onNotFound ( []() { Serial.println("Page Not Found"); server.send ( 400, "text/html", "Page not Found" );   }  );
+	server.onNotFound ( []() {  server.send ( 400, "text/html", "Page not Found" );   }  );
 	server.begin();
-	Serial.println( "HTTP server started" );
+	//Serial.println( "HTTP server started" );
 	tkSecond.attach(1,Second_Tick);
 	UDPNTPClient.begin(2390);  // Port for NTP receive
 }
@@ -149,11 +150,6 @@ void handle_log(){
 }
 
 void loop ( void ) {
-  if (FirstSettings and FirstPackage) {
-    FirstSettings = false;
-    Serial.println("start clock settings");
-    Update_Clock_Settings();
-  }
   
 	if (AdminEnabled)
 	{
@@ -171,34 +167,60 @@ void loop ( void ) {
 			NTPRefresh();
 			cNTP_Update =0;
 			firstStart = false;
+      setTime(UnixTimestamp); //Convert to TimeLIB Library First Time the time is set af power up!
+      UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
+      if (config.daylight) UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
+      setTime(UnixTimestamp_adjusted); //
+      WriteLogLine("start clock settings");
+      if (config.AutoStart) Update_Clock_Settings();
 		}
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
 
 			NTPRefresh();
 			cNTP_Update =0;
+     UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
+      if (config.daylight) 
+      UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
+      setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
+      WriteLogLine("NTP TIME UPDATED");
 		}
 	}
 
-	if(DateTime.minute != Minute_Old)
+  if (config.GetTimeMinute  > 0 )
+  {
+    if ( cGet_Time_Update > (config.GetTimeMinute * 60))
+    {
+      cGet_Time_Update = 0;
+      Serial.println("GET TIME");
+      WriteLogLine("GET TIME ");
+    }
+  }
+
+  
+
+
+
+  
+	if(minute() != Minute_Old)
 	{
-		 Minute_Old = DateTime.minute;
+		 Minute_Old = minute();
 		 if (config.AutoTurnOn)
 		 {
-			 if (DateTime.hour == config.TurnOnHour && DateTime.minute == config.TurnOnMinute)
+			 if (hour() == config.TurnOnHour && minute() == config.TurnOnMinute)
 			 {
-           Serial.println ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
-           WriteLogLine ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
+           Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+           WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
 			 }
 		 }
 
 
-		 Minute_Old = DateTime.minute;
+		 Minute_Old = minute();
 		 if (config.AutoTurnOff)
 		 {
-			 if (DateTime.hour == config.TurnOffHour && DateTime.minute == config.TurnOffMinute)
+			 if (hour() == config.TurnOffHour && minute() == config.TurnOffMinute)
 			 {
-				  Serial.println("SwitchOff");
+				  //Serial.println("SwitchOff");
 			 }
 		 }
 	}

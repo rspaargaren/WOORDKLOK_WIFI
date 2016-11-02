@@ -6,7 +6,7 @@
 
 const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<strong>WOORDKLOK</strong>
+<a href="/"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>WOORDKLOK ADMIN</strong>
 <hr>
 <a href="general.html" style="width:250px" class="btn btn--m btn--blue" >Auto Time Settings</a><br>
 <a href="config.html" style="width:250px" class="btn btn--m btn--blue" >Network Configuration</a><br>

@@ -1,12 +1,13 @@
 #ifndef PAGE_CLOCK_H
 #define PAGE_CLOCK_H
+#include <TimeLib.h>
 //
 //   The EXAMPLE PAGE
 //
 const char PAGE_Clock[] PROGMEM = R"=====(
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <h2>WOORDKLOK SETTINGS</h2>     
+  <a href="/"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>WOORDKLOK Settings</strong>     
   <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
   <tr><form action="" method="post">
   <td align="center" colspan="2">Geluid Klok</td><tr>
@@ -110,9 +111,9 @@ void filldynamicdataClock()
     else values += "Notat_5| checked |chk\n";
     values += "Light_Min|" +  String(config.LMin) + "|input\n";
     values += "Light_Max|" +  String(config.LMax) + "|input\n";
-    values += "Time_Hrs|" +  (String) DateTime.hour + "|input\n";
-    values += "Time_Min|" +  (String) DateTime.minute + "|input\n";
-    values += "Time_Sec|" +  (String) DateTime.second + "|input\n";
+    values += "Time_Hrs|" +  (String) hour() + "|input\n"; //(String) DateTime.hour + "|input\n";
+    values += "Time_Min|" +  (String) minute() + "|input\n"; //(String) DateTime.minute + "|input\n";
+    values += "Time_Sec|" +  (String) second() + "|input\n"; //(String) DateTime.second + "|input\n";
     values += "Clock_Mode|" +  String(config.ClockMode) + "|input\n";
     values += "Touch_Fil|" +  (String) config.TouchFil + "|input\n";
     values += "Touch_Tr_High|" +  (String) config.TouchTrH + "|input\n";

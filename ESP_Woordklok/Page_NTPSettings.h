@@ -46,7 +46,7 @@ const char PAGE_NTPConfiguration[] PROGMEM = R"=====(
 	<option value="130">(GMT+13:00)</option>
 </select>
 </td></tr>
-<tr><td align="right">Daylight saving:</td><td><input type="checkbox" id="dst" name="dst"></td></tr>
+<tr><td align="right">Daylight saving (Europe):</td><td><input type="checkbox" id="dst" name="dst"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
 </form>
@@ -89,7 +89,7 @@ void send_NTP_configuration_html()
 		firstStart = true;
 	}
 	server.send ( 200, "text/html", PAGE_NTPConfiguration ); 
-	Serial.println(__FUNCTION__); 
+	//Serial.println(__FUNCTION__); 
 	
 }
 
@@ -107,6 +107,6 @@ void send_NTP_configuration_values_html()
 	values += "tz|" +  (String) config.timezone + "|input\n";
 	values += "dst|" +  (String) (config.daylight ? "checked" : "") + "|chk\n";
 	server.send ( 200, "text/plain", values);
-	Serial.println(__FUNCTION__); 
+	//Serial.println(__FUNCTION__); 
 	
 }

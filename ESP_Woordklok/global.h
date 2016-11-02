@@ -1,6 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 #include "FS.h"
+#include <TimeLib.h>
 
 ESP8266WebServer server(80);									// The Webserver
 boolean firstStart = true;										// On firststart = true, NTP will try to get a valid time
@@ -8,10 +9,12 @@ int AdminTimeOutCounter = 0;									// Counter for Disabling the AdminMode
 strDateTime DateTime;											// Global DateTime structure, will be refreshed every Second
 WiFiUDP UDPNTPClient;											// NTP Client
 unsigned long UnixTimestamp = 0;								// GLOBALTIME  ( Will be set by NTP)
+unsigned long UnixTimestamp_adjusted = 0;
 boolean Refresh = false; // For Main Loop, to refresh things like GPIO / WS2812
 boolean FirstSettings = true;
 boolean FirstPackage = false;
 int cNTP_Update = 0;											// Counter for Updating the time via NTP
+int cGet_Time_Update = 0;
 Ticker tkSecond;												// Second - Timer for Updating Datetime Structure
 boolean AdminEnabled = true;		// Enable Admin Mode for a given Time
 byte Minute_Old = 100;				// Helpvariable for checking, when a new Minute comes up (for Auto Turn On / Off)
@@ -52,6 +55,7 @@ struct strConfig {
   int TouchTiS;
   int TouchTiL;
   boolean AutoStart;
+  int GetTimeMinute;
 }   config;
 
 
@@ -62,7 +66,7 @@ struct strConfig {
 */
 void ConfigureWifi()
 {
-	Serial.println("Configuring Wifi");
+	//Serial.println("Configuring Wifi");
 	WiFi.begin (config.ssid.c_str(), config.password.c_str());
 	if (!config.dhcp)
 	{
@@ -73,7 +77,7 @@ void ConfigureWifi()
 void WriteConfig()
 {
 
-	Serial.println("Writing Config");
+	//Serial.println("Writing Config");
 	EEPROM.write(0,'C');
 	EEPROM.write(1,'F');
 	EEPROM.write(2,'G');
@@ -118,6 +122,7 @@ void WriteConfig()
 	EEPROM.write(305,config.TurnOffMinute);
 	WriteStringToEEPROM(307,config.DeviceName);
   EEPROM.write(350,config.AutoStart);
+  EEPROM.write(351,config.GetTimeMinute);
 	
 
 
@@ -146,10 +151,10 @@ void WriteClockConfig()
 boolean ReadConfig()
 {
 
-	Serial.println("Reading Configuration");
+	//Serial.println("Reading Configuration");
 	if (EEPROM.read(0) == 'C' && EEPROM.read(1) == 'F'  && EEPROM.read(2) == 'G' )
 	{
-		Serial.println("Configurarion Found!");
+		//Serial.println("Configurarion Found!");
 		config.dhcp = 	EEPROM.read(16);
 
 		config.daylight = EEPROM.read(17);
@@ -187,19 +192,21 @@ boolean ReadConfig()
 		config.TurnOffMinute = EEPROM.read(305);
 		config.DeviceName= ReadStringFromEEPROM(306);
     config.AutoStart = EEPROM.read(350);
+    config.GetTimeMinute = EEPROM.read(351);
+    
 		return true;
 		
 	}
 	else
 	{
-		Serial.println("Configurarion NOT FOUND!!!!");
+		//Serial.println("Configurarion NOT FOUND!!!!");
 		return false;
 	}
 }
 
 void ReadClockConfig()
 {
-  Serial.println("Reading Clock Configuration");
+  //Serial.println("Reading Clock Configuration");
     config.SoundOnOff =  EEPROM.read(450);
     config.Notat =   EEPROM.read(451);
     config.LMin = EEPROM.read(452);
@@ -211,7 +218,7 @@ void ReadClockConfig()
     config.TouchTrH = EEPROM.read(458);
     config.TouchTiS = EEPROM.read(459);
     config.TouchTiL = EEPROM.read(460);
-    Serial.println("Clock Settings Read");
+    //Serial.println("Clock Settings Read");
     //return true;
 }
 
@@ -283,6 +290,7 @@ void Second_Tick()
 	strDateTime tempDateTime;
 	AdminTimeOutCounter++;
 	cNTP_Update++;
+  cGet_Time_Update++;
 	UnixTimestamp++;
 	ConvertUnixTimeStamp(UnixTimestamp +  (config.timezone *  360) , &tempDateTime);
 	if (config.daylight) // Sommerzeit beachten
@@ -303,19 +311,19 @@ void Second_Tick()
 
 void WriteLogLine(String LogLine){
     File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
-    bestand.println(String(DateTime.hour) + ":" + String(DateTime.minute) + ":" + String(DateTime.second) + " - " + LogLine);
+    bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
     bestand.close();
 }
 
 void ResetLogFile (){
     File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
-    bestand.println("New Logfile created on: " + String(DateTime.hour) + ":" + String(DateTime.minute) + ":" + String(DateTime.second));
+    bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
     bestand.close();
 }
 
 void Update_Clock_Settings(){
   int delaytijd = 100;
-                 Serial.println("update clock settings on startup");
+                 //Serial.println("update clock settings on startup");
                  delay(delaytijd);
                  Serial.println("SET NOTAT " + (String) config.Notat);
                  WriteLogLine("SET NOTAT " + (String) config.Notat);
@@ -334,21 +342,12 @@ void Update_Clock_Settings(){
                     Serial.println("SET SOUND 0");
                     WriteLogLine("SET SOUND 0");
                  }
-                 delay(delaytijd);
-                 if (config.TouchOnOff) { 
-                    Serial.println("SET TOUCH 1");
-                    WriteLogLine("SET TOUCH 1");
-                 }
-                 else {
-                    Serial.println("SET TOUCH 0");
-                    WriteLogLine("SET TOUCH 0");
-                 }
                   delay(delaytijd);
                   Serial.println ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
                   WriteLogLine ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);
                   delay(delaytijd);
-                  Serial.println ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
-                  WriteLogLine ("SET TIME " + FormatTime(DateTime.hour) + ":" + FormatTime(DateTime.minute) + ":" + FormatTime(DateTime.second) );
+                  Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );  // Aangepast aan timelib.h
+                  WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );    // Aangepast aan timelib.h
                  delay(delaytijd);
                  Serial.println("SET MODE " +  (String) config.ClockMode);
                  WriteLogLine("SET MODE " +  (String) config.ClockMode);

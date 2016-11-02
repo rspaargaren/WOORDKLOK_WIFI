@@ -40,6 +40,12 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 <tr>
   <td align="left" colspan="2"><hr></td>
 </tr>
+
+<tr><td align="right">LOG CLOCK TIME EVERY:</td><td><input type='number' id="Get_Time" name='Get_Time'  min="0" max="60" value='0' pattern="[0-9]*" > minutes (0=disable)</td></tr>
+<tr>
+  <td align="left" colspan="2"><hr></td>
+</tr>
+
 <tr>
 	<td align="left" colspan="2">GEEN FUNCTIE</td>
 <tr>
@@ -51,6 +57,20 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 	<td><input type="text" id="toffhour" name="toffhour" size="2" value="00">:<input type="text" id="toffminute" name="toffminute" size="2" value="00"></td>
 </tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
+</table>
+</form>
+<form action="" method="post">
+<table border="0"  cellspacing="0" cellpadding="3" >
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Touch" name='bGet_Touch' style="width:150px" class="btn btn--m btn--blue" value="GETTOUCH"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Light" name='bGet_Light' style="width:150px" class="btn btn--m btn--blue" value="GETLIGHT"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Mode" name='bGet_Mode' style="width:150px" class="btn btn--m btn--blue" value="GETMODE"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Tcomp" name='bGet_Tcomp' style="width:150px" class="btn btn--m btn--blue" value="GETTCOMP"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Sound" name='bGet_Sound' style="width:150px" class="btn btn--m btn--blue" value="GETSOUND"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bGet_Time" name='bGet_Time' style="width:150px" class="btn btn--m btn--blue" value="GETTIME"></td></tr>
+<tr><td> <input type="text" id="man_input" name="man_input" value=""></td><td  align="center"><input type="submit" id="bManual" name='bManual' style="width:150px" class="btn btn--m btn--blue" value="GETMAN"></td></tr>
+
+
+
 </table>
 </form>
 <script>
@@ -104,12 +124,41 @@ void send_general_html()
 			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
       if (server.argName(i) == "Update_Start") config.AutoStart = true; 
+      if (server.argName(i) == "Get_Time") config.GetTimeMinute =  server.arg(i).toInt();
+      if (server.argName(i) == "bGet_Touch") {
+        Serial.println("GET TOUCH");
+        WriteLogLine("GET TOUCH");
+      }
+      if (server.argName(i) == "bGet_Sound") {
+        Serial.println("GET SOUND");
+        WriteLogLine("GET SOUND");
+      }
+      if (server.argName(i) == "bGet_Light") {
+        Serial.println("GET LIGHT");
+        WriteLogLine("GET LIGHT");
+      }
+      if (server.argName(i) == "bGet_Mode") {
+        Serial.println("GET MODE");
+        WriteLogLine("GET MODE");
+      }
+      if (server.argName(i) == "bGet_Tcomp") {
+        Serial.println("GET TCOMP");
+        WriteLogLine("GET TCOMP");
+      }
+      if (server.argName(i) == "bGet_Time") {
+        Serial.println("GET TIME");
+        WriteLogLine("GET TIME");
+      }
+      if (server.argName(i) == "bManual") {
+        Serial.println(String(server.arg("man_input")));
+        WriteLogLine(String(server.arg("man_input")));
+      }
 		}
 		WriteConfig();
-		firstStart = true;
+		//firstStart = true;
 	}
 	server.send ( 200, "text/html", PAGE_AdminGeneralSettings ); 
-	Serial.println(__FUNCTION__); 
+	//Serial.println(__FUNCTION__); 
 	
 	
 }
@@ -125,7 +174,9 @@ void send_general_configuration_values_html()
 	values += "toffenabled|" +  (String) (config.AutoTurnOff ? "checked" : "") + "|chk\n";
 	values += "tonenabled|" +  (String) (config.AutoTurnOn ? "checked" : "") + "|chk\n";
   values += "Update_Start|" +  (String) (config.AutoStart ? "checked" : "") + "|chk\n";
+  values += "Get_Time|" +   (String)  config.GetTimeMinute +  "|input\n";
+  
   
 	server.send ( 200, "text/plain", values);
-	Serial.println(__FUNCTION__); 
+	//Serial.println(__FUNCTION__); 
 }
