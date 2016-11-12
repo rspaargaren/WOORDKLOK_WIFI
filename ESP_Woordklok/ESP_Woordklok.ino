@@ -47,7 +47,7 @@ Include the HTML, STYLE and Script "Pages"
 
 #define ACCESS_POINT_NAME  "WOORDKLOK"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
-#define AdminTimeOut 60  // Defines the Time in Seconds, when the Admin-Mode will be diabled
+#define AdminTimeOut 240
 
 ESP8266HTTPUpdateServer httpUpdater;
 
