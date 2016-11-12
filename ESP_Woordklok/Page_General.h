@@ -58,8 +58,6 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 </tr>
 <tr><td colspan="2" align="center"><input type="submit" style="width:150px" class="btn btn--m btn--blue" value="Save"></td></tr>
 </table>
-</form>
-<form action="" method="post">
 <table border="0"  cellspacing="0" cellpadding="3" >
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Touch" name='bGet_Touch' style="width:150px" class="btn btn--m btn--blue" value="GETTOUCH"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Light" name='bGet_Light' style="width:150px" class="btn btn--m btn--blue" value="GETLIGHT"></td></tr>

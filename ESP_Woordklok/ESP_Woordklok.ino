@@ -132,7 +132,7 @@ void setup ( void ) {
 	server.on ( "/admin/devicename",     send_devicename_value_html);
   server.on ( "/clock.html", processClock ); 
   server.on ( "/Log.html", handle_log ); 
-  server.on ( "/ResetLog.html", ResetLogFile ); 
+  server.on ( "/ResetLog.html", handle_reset ); 
 
  
 
@@ -147,6 +147,14 @@ void handle_log(){
   File bestand = SPIFFS.open("/data.txt", "r");
   size_t sent = server.streamFile(bestand, "text/plain");
   bestand.close();
+}
+
+void handle_reset(){
+    File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
+    bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
+    delay(1000);
+    size_t sent = server.streamFile(bestand, "text/plain");
+    bestand.close();
 }
 
 void loop ( void ) {
