@@ -190,7 +190,7 @@ boolean ReadConfig()
 		config.TurnOnMinute = EEPROM.read(303);
 		config.TurnOffHour = EEPROM.read(304);
 		config.TurnOffMinute = EEPROM.read(305);
-		config.DeviceName= ReadStringFromEEPROM(306);
+		config.DeviceName= ReadStringFromEEPROM(307);
     config.AutoStart = EEPROM.read(350);
     config.GetTimeMinute = EEPROM.read(351);
     
