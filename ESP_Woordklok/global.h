@@ -120,7 +120,7 @@ void WriteConfig()
 	EEPROM.write(303,config.TurnOnMinute);
 	EEPROM.write(304,config.TurnOffHour);
 	EEPROM.write(305,config.TurnOffMinute);
-	WriteStringToEEPROM(307,config.DeviceName);
+	WriteStringToEEPROM(306,config.DeviceName);
   EEPROM.write(350,config.AutoStart);
   EEPROM.write(351,config.GetTimeMinute);
 	
