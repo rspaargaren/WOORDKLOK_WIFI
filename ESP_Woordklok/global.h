@@ -55,6 +55,7 @@ struct strConfig {
   int TouchTiS;
   int TouchTiL;
   boolean AutoStart;
+  boolean Clock_NTP_Update;
   int GetTimeMinute;
 }   config;
 
@@ -123,9 +124,8 @@ void WriteConfig()
 	WriteStringToEEPROM(306,config.DeviceName);
   EEPROM.write(350,config.AutoStart);
   EEPROM.write(351,config.GetTimeMinute);
-	
-
-
+  EEPROM.write(352,config.Clock_NTP_Update);
+  
 	EEPROM.commit();
 }
 
@@ -193,6 +193,7 @@ boolean ReadConfig()
 		config.DeviceName= ReadStringFromEEPROM(306);
     config.AutoStart = EEPROM.read(350);
     config.GetTimeMinute = EEPROM.read(351);
+    config.Clock_NTP_Update = EEPROM.read(352);
     
 		return true;
 		

@@ -79,6 +79,7 @@ void setup ( void ) {
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
     config.AutoStart = false;
+    config.Clock_NTP_Update = false;
     config.GetTimeMinute = 0;
 		WriteConfig();
     config.SoundOnOff = false;
@@ -193,6 +194,10 @@ void loop ( void ) {
       UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
       setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
       WriteLogLine("NTP TIME UPDATED");
+      if (config.Clock_NTP_Update) {
+        Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+        WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+      }
 		}
 	}
 

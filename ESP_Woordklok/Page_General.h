@@ -40,6 +40,13 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 <tr>
   <td align="left" colspan="2"><hr></td>
 </tr>
+<tr>
+  <td align="right"> Update Clock at NTP Update?:</td>
+  <td><input type="checkbox" id="Update_NTP" name="Update_NTP"></td>
+</tr>
+<tr>
+  <td align="left" colspan="2"><hr></td>
+</tr>
 
 <tr><td align="right">LOG CLOCK TIME EVERY:</td><td><input type='number' id="Get_Time" name='Get_Time'  min="0" max="60" value='0' pattern="[0-9]*" > minutes (0=disable)</td></tr>
 <tr>
@@ -112,6 +119,7 @@ void send_general_html()
 		config.AutoTurnOn = false;
 		config.AutoTurnOff = false;
     config.AutoStart = false;
+    config.Clock_NTP_Update = false;
 		String temp = "";
 		for ( uint8_t i = 0; i < server.args(); i++ ) {
 			if (server.argName(i) == "devicename") config.DeviceName = urldecode(server.arg(i)); 
@@ -122,6 +130,7 @@ void send_general_html()
 			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
 			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
       if (server.argName(i) == "Update_Start") config.AutoStart = true; 
+      if (server.argName(i) == "Update_NTP") config.Clock_NTP_Update = true;
       if (server.argName(i) == "Get_Time") config.GetTimeMinute =  server.arg(i).toInt();
       if (server.argName(i) == "bGet_Touch") {
         Serial.println("GET TOUCH");
@@ -172,6 +181,7 @@ void send_general_configuration_values_html()
 	values += "toffenabled|" +  (String) (config.AutoTurnOff ? "checked" : "") + "|chk\n";
 	values += "tonenabled|" +  (String) (config.AutoTurnOn ? "checked" : "") + "|chk\n";
   values += "Update_Start|" +  (String) (config.AutoStart ? "checked" : "") + "|chk\n";
+  values += "Update_NTP|" +  (String) (config.Clock_NTP_Update ? "checked" : "") + "|chk\n";
   values += "Get_Time|" +   (String)  config.GetTimeMinute +  "|input\n";
   
   
