@@ -151,12 +151,15 @@ void handle_log(){
 }
 
 void handle_reset(){
-    File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
-    bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
-    bestand.close();
+//    File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
+//    bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
+//    bestand.close();
     //bestand = SPIFFS.open("/data.txt", "r");
     //size_t sent = server.streamFile(bestand, "text/plain");
     //bestand.close();
+    ResetLogFile();
+    server.sendHeader("Location","/Log.html");
+    server.send(302, "text/plain","OK");
 }
 
 void loop ( void ) {

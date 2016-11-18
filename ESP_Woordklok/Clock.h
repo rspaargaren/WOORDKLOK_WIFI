@@ -32,12 +32,12 @@ const char PAGE_Clock[] PROGMEM = R"=====(
   <td align="center"  colspan="2">Sterkte Filter <input type='number' id="Touch_Fil" name='Touch_Fil'  min="1" max="8" value='5' pattern="[0-9]*" > </td>
   </tr>
   <tr>
-  <td align="center">Tres. Low <input type='number' id="Touch_Tr_Low" name='Touch_Tr_Low'  min="1" max="200" value='15' pattern="[0-9]*" > </td>
-  <td align="center">Tres. High <input type='number' id="Touch_Tr_High" name='Touch_Tr_High'  min="1" max="200" value='30' pattern="[0-9]*" > </td>
+  <td align="center">Tres. Low <input type='number' id="Touch_Tr_Low" name='Touch_Tr_Low'  min="1" max="999" value='15' pattern="[0-9]*" > </td>
+  <td align="center">Tres. High <input type='number' id="Touch_Tr_High" name='Touch_Tr_High'  min="1" max="999" value='30' pattern="[0-9]*" > </td>
   </tr>
     <tr>
-  <td align="center">Ticks Short <input type='number' id="Touch_Ti_Short" name='Touch_Ti_Short'  min="1" max="200" value='10' pattern="[0-9]*" > </td>
-  <td align="center">Ticks Long <input type='number' id="Touch_Ti_Long" name='Touch_Ti_Long'  min="1" max="200" value='100' pattern="[0-9]*" > </td>
+  <td align="center">Ticks Short <input type='number' id="Touch_Ti_Short" name='Touch_Ti_Short'  min="1" max="999" value='10' pattern="[0-9]*" > </td>
+  <td align="center">Ticks Long <input type='number' id="Touch_Ti_Long" name='Touch_Ti_Long'  min="1" max="999" value='100' pattern="[0-9]*" > </td>
   </tr>
   </table>
   <hr>
