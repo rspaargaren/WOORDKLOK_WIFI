@@ -146,7 +146,7 @@ void setup ( void ) {
 
 void handle_log(){
   File bestand = SPIFFS.open("/data.txt", "r");
-  size_t sent = server.streamFile(bestand, "text/plain");
+  size_t sent = server.streamFile(bestand, "text/plain;charset=UTF-8");
   bestand.close();
 }
 
@@ -177,7 +177,15 @@ void loop ( void ) {
 	{
 		if (cNTP_Update > 5 && firstStart)
 		{
-			NTPRefresh();
+			boolean refresh = NTPRefresh();
+      if (!refresh) {
+        WriteLogLine("Failure to refresh NTP. Retrying once...");
+        NTPRefresh();
+      }
+      if (!refresh) {
+        WriteLogLine("NTP failure. Clock might be out of time...");
+        NTPRefresh();
+      }
 			cNTP_Update =0;
 			firstStart = false;
       setTime(UnixTimestamp); //Convert to TimeLIB Library First Time the time is set af power up!
@@ -190,7 +198,7 @@ void loop ( void ) {
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
 
-			NTPRefresh();
+			if ( NTPRefresh() ) {
 			cNTP_Update =0;
      UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
       if (config.daylight) 
@@ -201,6 +209,9 @@ void loop ( void ) {
         Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
         WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
       }
+			} else {
+        WriteLogLine("The NTP refresh failed to work. Better luck next time...");
+			}
 		}
 	}
 

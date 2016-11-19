@@ -233,7 +233,7 @@ void ReadClockConfig()
 
 const int NTP_PACKET_SIZE = 48; 
 byte packetBuffer[ NTP_PACKET_SIZE]; 
-void NTPRefresh()
+boolean NTPRefresh()
 {
 
 	
@@ -282,8 +282,10 @@ void NTPRefresh()
 			unsigned long epoch = secsSince1900 - seventyYears;
 			UnixTimestamp = epoch;
       FirstPackage = true;
+      return true;
 		}
 	}
+ return false;
 }
 
 void Second_Tick()
