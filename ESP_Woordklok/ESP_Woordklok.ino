@@ -134,6 +134,8 @@ void setup ( void ) {
   server.on ( "/clock.html", processClock ); 
   server.on ( "/Log.html", handle_log ); 
   server.on ( "/ResetLog.html", handle_reset ); 
+  server.on ( "/Update.html", handle_update ); 
+  server.on ( "/reboot", handle_reboot );
 
  
 
@@ -142,6 +144,21 @@ void setup ( void ) {
 	//Serial.println( "HTTP server started" );
 	tkSecond.attach(1,Second_Tick);
 	UDPNTPClient.begin(2390);  // Port for NTP receive
+}
+
+
+void handle_reboot() {
+    server.send(200, "text/plain","OK");
+    ESP.restart();
+}
+
+void handle_update() {
+    // Stop any trafficing
+    UDPNTPClient.stop();
+    Serial.end();
+    // Redirect to the real update
+    server.sendHeader("Location","/update");
+    server.send(302, "text/plain","OK");
 }
 
 void handle_log(){
@@ -198,20 +215,23 @@ void loop ( void ) {
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
 
-      cNTP_Update =0;
+			cNTP_Update =0;
 			if ( NTPRefresh() ) {
-     UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
+      int iHour = hour();
+      int iMinute = minute();
+      int iSecond = second();
+      UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
       if (config.daylight) 
       UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
+
+      WriteLogLine("NTP TIME UPDATED using: " + UnixTimestamp); 
+      WriteLogLine ("CURRENT  " + FormatTime(iHour) + ":" + FormatTime(iMinute) + ":" + FormatTime(iSecond) );
       setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
-      WriteLogLine("NTP TIME UPDATED");
-      if (config.Clock_NTP_Update) {
-        Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
-        WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+      WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+      Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+      } else {
+        WriteLogLine("NTP FAILED UPDATE");        
       }
-			} else {
-        WriteLogLine("The NTP refresh failed to work. Better luck next time...");
-			}
 		}
 	}
 
@@ -263,7 +283,7 @@ void loop ( void ) {
   while(Serial.available()){
     Serial.setTimeout(75);
     String Ser_Input = Serial.readString();
-    WriteLogLine(Ser_Input);
+    WriteLogLine("> " + Ser_Input);
   }
 
 	if (Refresh)  

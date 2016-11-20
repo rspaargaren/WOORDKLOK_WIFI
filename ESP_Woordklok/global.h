@@ -60,6 +60,12 @@ struct strConfig {
 }   config;
 
 
+void WriteLogLine(String LogLine){
+    File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
+    bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
+    bestand.close();
+}
+
 /*
 **
 ** CONFIGURATION HANDLING
@@ -247,7 +253,7 @@ boolean NTPRefresh()
 
 
 		//Serial.println("sending NTP packet...");
-//    WriteLogLine("sending NTP packet...");
+    WriteLogLine("Sending NTP packet... ");
 		memset(packetBuffer, 0, NTP_PACKET_SIZE);
 		packetBuffer[0] = 0b11100011;   // LI, Version, Mode
 		packetBuffer[1] = 0;     // Stratum, or type of clock
@@ -273,7 +279,7 @@ boolean NTPRefresh()
 		{
 			//Serial.print("NTP packet received, length=");
 			//Serial.println(cb);
-	//		WriteLogLine("NTP packet received, length=" + (String) cb);
+			WriteLogLine("NTP packet received; length: " + (String) cb);
 			UDPNTPClient.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
 			unsigned long highWord = word(packetBuffer[40], packetBuffer[41]);
 			unsigned long lowWord = word(packetBuffer[42], packetBuffer[43]);
@@ -282,6 +288,9 @@ boolean NTPRefresh()
 			unsigned long epoch = secsSince1900 - seventyYears;
 			UnixTimestamp = epoch;
       FirstPackage = true;
+			WriteLogLine("NTP packet time is: " + (String) epoch);
+      UDPNTPClient.flush();
+
       return true;
 		}
 	}
@@ -312,11 +321,6 @@ void Second_Tick()
 	Refresh = true;
 }
 
-void WriteLogLine(String LogLine){
-    File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
-    bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
-    bestand.close();
-}
 
 void ResetLogFile (){
     File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
