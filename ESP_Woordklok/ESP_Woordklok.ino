@@ -198,8 +198,8 @@ void loop ( void ) {
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
 
+      cNTP_Update =0;
 			if ( NTPRefresh() ) {
-			cNTP_Update =0;
      UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
       if (config.daylight) 
       UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
