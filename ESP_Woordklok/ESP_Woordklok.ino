@@ -143,7 +143,6 @@ void setup ( void ) {
 	server.begin();
 	//Serial.println( "HTTP server started" );
 	tkSecond.attach(1,Second_Tick);
-	UDPNTPClient.begin(2390);  // Port for NTP receive
 }
 
 
@@ -154,7 +153,6 @@ void handle_reboot() {
 
 void handle_update() {
     // Stop any trafficing
-    UDPNTPClient.stop();
     Serial.end();
     // Redirect to the real update
     server.sendHeader("Location","/update");

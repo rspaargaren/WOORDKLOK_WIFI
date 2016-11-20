@@ -241,6 +241,7 @@ const int NTP_PACKET_SIZE = 48;
 byte packetBuffer[ NTP_PACKET_SIZE]; 
 boolean NTPRefresh()
 {
+  UDPNTPClient.begin(2390);  // Port for NTP receive
 
 	
 
@@ -290,10 +291,11 @@ boolean NTPRefresh()
       FirstPackage = true;
 			WriteLogLine("NTP packet time is: " + (String) epoch);
       UDPNTPClient.flush();
-
+      UDPNTPClient.stop();
       return true;
 		}
 	}
+ UDPNTPClient.stop();
  return false;
 }
 
