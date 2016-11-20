@@ -57,6 +57,7 @@ void setup ( void ) {
 	Serial.begin(9600);
   SPIFFS.begin();
 	delay(500);
+  WriteLogLine("ESP init: setting up clock.");
 	//Serial.println("Starting ES8266");
 	if (!ReadConfig())
 	{
