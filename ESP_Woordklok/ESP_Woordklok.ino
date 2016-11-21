@@ -180,12 +180,7 @@ void loop ( void ) {
 		{
 			boolean refresh = NTPRefresh();
       if (!refresh) {
-        WriteLogLine("Failure to refresh NTP. Retrying once...");
-        NTPRefresh();
-      }
-      if (!refresh) {
         WriteLogLine("NTP failure. Clock might be out of time...");
-        NTPRefresh();
       }
 			cNTP_Update =0;
 			firstStart = false;
