@@ -216,15 +216,11 @@ void loop ( void ) {
 
 			cNTP_Update =0;
 			if ( NTPRefresh() ) {
-      int iHour = hour();
-      int iMinute = minute();
-      int iSecond = second();
       UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
       if (config.daylight) 
       UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
 
-      WriteLogLine("NTP TIME UPDATED using: " + UnixTimestamp); 
-      WriteLogLine ("CURRENT  " + FormatTime(iHour) + ":" + FormatTime(iMinute) + ":" + FormatTime(iSecond) );
+      WriteLogLine("NTP TIME UPDATED"); 
       setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
       WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
       Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
