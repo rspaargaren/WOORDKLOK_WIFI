@@ -204,7 +204,7 @@ void loop ( void ) {
 
         if (config.Clock_NTP_Update) {
           Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
-          WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+          WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
         }
       } else {
         WriteLogLine("NTP FAILED UPDATE");        
