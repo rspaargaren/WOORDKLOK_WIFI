@@ -135,8 +135,6 @@ void setup ( void ) {
   server.on ( "/clock.html", processClock ); 
   server.on ( "/Log.html", handle_log ); 
   server.on ( "/ResetLog.html", handle_reset ); 
-  server.on ( "/Update.html", handle_update ); 
-  server.on ( "/reboot", handle_reboot );
 
  
 
@@ -146,19 +144,6 @@ void setup ( void ) {
 	tkSecond.attach(1,Second_Tick);
 }
 
-
-void handle_reboot() {
-    server.send(200, "text/plain","OK");
-    ESP.restart();
-}
-
-void handle_update() {
-    // Stop any trafficing
-    Serial.end();
-    // Redirect to the real update
-    server.sendHeader("Location","/update");
-    server.send(302, "text/plain","OK");
-}
 
 void handle_log(){
   File bestand = SPIFFS.open("/data.txt", "r");
@@ -213,17 +198,19 @@ void loop ( void ) {
 		}
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
+      cNTP_Update = 0;
+      if ( NTPRefresh() ) {
+        UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
+        if (config.daylight) {
+          UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
+        }
+        WriteLogLine("NTP TIME UPDATED"); 
+        setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
 
-			cNTP_Update =0;
-			if ( NTPRefresh() ) {
-      UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
-      if (config.daylight) 
-      UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
-
-      WriteLogLine("NTP TIME UPDATED"); 
-      setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
-      WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
-      Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+        if (config.Clock_NTP_Update) {
+          Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+          WriteLogLine ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+        }
       } else {
         WriteLogLine("NTP FAILED UPDATE");        
       }

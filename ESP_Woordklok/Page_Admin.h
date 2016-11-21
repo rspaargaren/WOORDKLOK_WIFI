@@ -12,7 +12,7 @@ const char PAGE_AdminMainPage[] PROGMEM = R"=====(
 <a href="config.html" style="width:250px" class="btn btn--m btn--blue" >Network Configuration</a><br>
 <a href="info.html"   style="width:250px"  class="btn btn--m btn--blue" >Network Information</a><br>
 <a href="ntp.html"   style="width:250px"  class="btn btn--m btn--blue" >NTP Settings</a><br>
-<a href="Update.html"   style="width:250px"  class="btn btn--m btn--blue" >Update BIN File</a><br>
+<a href="update"   style="width:250px"  class="btn btn--m btn--blue" >Update BIN File</a><br>
 <a href="ResetLog.html"   style="width:250px"  class="btn btn--m btn--blue" >Reset Log File</a><br>
 
 <script>
