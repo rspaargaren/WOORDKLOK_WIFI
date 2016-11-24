@@ -57,6 +57,7 @@ void setup ( void ) {
 	Serial.begin(9600);
   SPIFFS.begin();
 	delay(500);
+  WriteLogLine("ESP init: setting up clock.");
 	//Serial.println("Starting ES8266");
 	if (!ReadConfig())
 	{
@@ -141,12 +142,12 @@ void setup ( void ) {
 	server.begin();
 	//Serial.println( "HTTP server started" );
 	tkSecond.attach(1,Second_Tick);
-	UDPNTPClient.begin(2390);  // Port for NTP receive
 }
+
 
 void handle_log(){
   File bestand = SPIFFS.open("/data.txt", "r");
-  size_t sent = server.streamFile(bestand, "text/plain");
+  size_t sent = server.streamFile(bestand, "text/plain;charset=UTF-8");
   bestand.close();
 }
 
@@ -177,7 +178,10 @@ void loop ( void ) {
 	{
 		if (cNTP_Update > 5 && firstStart)
 		{
-			NTPRefresh();
+			boolean refresh = NTPRefresh();
+      if (!refresh) {
+        WriteLogLine("NTP failure. Clock might be out of time...");
+      }
 			cNTP_Update =0;
 			firstStart = false;
       setTime(UnixTimestamp); //Convert to TimeLIB Library First Time the time is set af power up!
@@ -189,17 +193,21 @@ void loop ( void ) {
 		}
 		else if ( cNTP_Update > (config.Update_Time_Via_NTP_Every * 60) )
 		{
+      cNTP_Update = 0;
+      if ( NTPRefresh() ) {
+        UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
+        if (config.daylight) {
+          UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
+        }
+        WriteLogLine("NTP TIME UPDATED"); 
+        setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
 
-			NTPRefresh();
-			cNTP_Update =0;
-     UnixTimestamp_adjusted = UnixTimestamp + (config.timezone *  360);
-      if (config.daylight) 
-      UnixTimestamp_adjusted = UnixTimestamp_adjusted + adjustDstEurope();
-      setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
-      WriteLogLine("NTP TIME UPDATED");
-      if (config.Clock_NTP_Update) {
-        Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
-        WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+        if (config.Clock_NTP_Update) {
+          Serial.println ("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+          WriteLogLine ("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()) );
+        }
+      } else {
+        WriteLogLine("NTP FAILED UPDATE");        
       }
 		}
 	}
@@ -252,7 +260,7 @@ void loop ( void ) {
   while(Serial.available()){
     Serial.setTimeout(75);
     String Ser_Input = Serial.readString();
-    WriteLogLine(Ser_Input);
+    WriteLogLine("> " + Ser_Input);
   }
 
 	if (Refresh)  
