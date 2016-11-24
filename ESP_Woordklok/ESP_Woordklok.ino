@@ -53,6 +53,7 @@ ESP8266HTTPUpdateServer httpUpdater;
 
 
 void setup ( void ) {
+	delay(5000); //De klok even de tijd geven om op te starten
 	EEPROM.begin(512);
 	Serial.begin(9600);
   SPIFFS.begin();
