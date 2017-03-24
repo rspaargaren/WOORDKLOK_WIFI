@@ -49,6 +49,15 @@ Include the HTML, STYLE and Script "Pages"
 #define ACCESS_POINT_PASSWORD  "12345678" 
 #define AdminTimeOut 240
 
+//#define DEBUG 1
+#ifdef DEBUG
+#  define debug_print(x) Serial.println(x)
+#  define debug_statement(x) x
+#else
+#  define debug_print(x)
+#  define debug_statement(x)
+#endif
+
 ESP8266HTTPUpdateServer httpUpdater;
 
 
@@ -56,10 +65,11 @@ void setup ( void ) {
 	delay(5000); //De klok even de tijd geven om op te starten
 	EEPROM.begin(512);
 	Serial.begin(9600);
-  SPIFFS.begin();
+	SPIFFS.begin();
 	delay(500);
-  WriteLogLine("ESP init: setting up clock.");
-	//Serial.println("Starting ES8266");
+	debug_statement(Serial.setDebugOutput(true));
+	WriteLogLine("ESP init: setting up clock.");
+	debug_print("Starting ES8266");
 	if (!ReadConfig())
 	{
 		// DEFAULT CONFIG
@@ -80,28 +90,29 @@ void setup ( void ) {
 		config.TurnOffMinute = 0;
 		config.TurnOnHour = 0;
 		config.TurnOnMinute = 0;
-    config.AutoStart = false;
-    config.Clock_NTP_Update = false;
-    config.GetTimeMinute = 0;
+		config.AutoStart = false;
+		config.Clock_NTP_Update = false;
+		config.GetTimeMinute = 0;
 		WriteConfig();
-    config.SoundOnOff = false;
-    config.Notat = 1;
-    config.LMin = 5;
-    config.LMax = 100;
-    config.ClockMode = 150;
-    config.TouchOnOff = true;
-    config.TouchFil = 5;
-    config.TouchTrL = 15;
-    config.TouchTrH = 30;
-    config.TouchTiS = 10;
-    config.TouchTiL = 100;
-    WriteClockConfig;
-		//Serial.println("General config applied");
+		config.SoundOnOff = false;
+		config.Notat = 1;
+		config.LMin = 5;
+		config.LMax = 100;
+		config.ClockMode = 150;
+		config.TouchOnOff = true;
+		config.TouchFil = 5;
+		config.TouchTrL = 15;
+		config.TouchTrH = 30;
+		config.TouchTiS = 10;
+		config.TouchTiL = 100;
+		WriteClockConfig;
+		debug_print("General config applied");
 	}
 	ReadClockConfig();
 	
 	if (AdminEnabled)
 	{
+		debug_print("Admin enabled. Starting access point: "ACCESS_POINT_NAME"; password: "ACCESS_POINT_PASSWORD);
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP( ACCESS_POINT_NAME , ACCESS_POINT_PASSWORD);
 	}
@@ -111,8 +122,10 @@ void setup ( void ) {
 	}
 
 	ConfigureWifi();
+	debug_statement(WiFi.printDiag(Serial));
+
 	
-  httpUpdater.setup(&server);
+	httpUpdater.setup(&server);
 	server.on ( "/", []() { server.send ( 200, "text/html", PAGE_Welcome );   }  );
 	server.on ( "/admin/filldynamicdataClock", filldynamicdataClock );
   
@@ -133,45 +146,44 @@ void setup ( void ) {
 	server.on ( "/admin/ntpvalues", send_NTP_configuration_values_html );
 	server.on ( "/admin/generalvalues", send_general_configuration_values_html);
 	server.on ( "/admin/devicename",     send_devicename_value_html);
-  server.on ( "/clock.html", processClock ); 
-  server.on ( "/Log.html", handle_log ); 
-  server.on ( "/ResetLog.html", handle_reset ); 
+	server.on ( "/clock.html", processClock ); 
+	server.on ( "/Log.html", handle_log ); 
+	server.on ( "/ResetLog.html", handle_reset ); 
 
  
 
 	server.onNotFound ( []() {  server.send ( 400, "text/html", "Page not Found" );   }  );
 	server.begin();
-	//Serial.println( "HTTP server started" );
+	debug_print("HTTP server started");
 	tkSecond.attach(1,Second_Tick);
 }
 
 
-void handle_log(){
-  File bestand = SPIFFS.open("/data.txt", "r");
-  size_t sent = server.streamFile(bestand, "text/plain;charset=UTF-8");
-  bestand.close();
+void handle_log() {
+	File bestand = SPIFFS.open("/data.txt", "r");
+	size_t sent = server.streamFile(bestand, "text/plain;charset=UTF-8");
+	bestand.close();
 }
 
-void handle_reset(){
-//    File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
-//    bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
-//    bestand.close();
-    //bestand = SPIFFS.open("/data.txt", "r");
-    //size_t sent = server.streamFile(bestand, "text/plain");
-    //bestand.close();
-    ResetLogFile();
-    server.sendHeader("Location","/Log.html");
-    server.send(302, "text/plain","OK");
+void handle_reset() {
+	//File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
+	//bestand.println("New Logfile created on: " + String(hour()) + ":" + String(minute()) + ":" + String(second())+ "---" + String(year()) + "/" + String(month()) + "/" + String(day()));
+	//bestand.close();
+	//bestand = SPIFFS.open("/data.txt", "r");
+	//size_t sent = server.streamFile(bestand, "text/plain");
+	//bestand.close();
+	ResetLogFile();
+	server.sendHeader("Location","/Log.html");
+	server.send(302, "text/plain","OK");
 }
 
 void loop ( void ) {
-  
 	if (AdminEnabled)
 	{
 		if (AdminTimeOutCounter > AdminTimeOut)
 		{
 			 AdminEnabled = false;
-			 //Serial.println("Admin Mode disabled!");
+			 debug_print("Admin Mode disabled!");
 			 WiFi.mode(WIFI_STA);
 		}
 	}
@@ -179,6 +191,7 @@ void loop ( void ) {
 	{
 		if (cNTP_Update > 5 && firstStart)
 		{
+			debug_print("NTPRefresh");
 			boolean refresh = NTPRefresh();
       if (!refresh) {
         WriteLogLine("NTP failure. Clock might be out of time...");
