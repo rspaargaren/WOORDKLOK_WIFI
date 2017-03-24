@@ -88,7 +88,7 @@ void send_NTP_configuration_html()
 		WriteConfig();
 		firstStart = true;
 	}
-	server.send ( 200, "text/html", PAGE_NTPConfiguration ); 
+	server.send_P ( 200, CONTENT_Html, PAGE_NTPConfiguration ); 
 	//Serial.println(__FUNCTION__); 
 	
 }

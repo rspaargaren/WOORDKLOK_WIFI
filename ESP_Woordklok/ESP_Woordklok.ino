@@ -17,6 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
+const char CONTENT_Html[] PROGMEM = R"=====(text/html)=====";
+const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -126,20 +128,20 @@ void setup ( void ) {
 
 	
 	httpUpdater.setup(&server);
-	server.on ( "/", []() { server.send ( 200, "text/html", PAGE_Welcome );   }  );
+	server.on ( "/", []() { server.send_P ( 200, CONTENT_Html, PAGE_Welcome );   }  );
 	server.on ( "/admin/filldynamicdataClock", filldynamicdataClock );
   
 	server.on ( "/favicon.ico",   []() { server.send ( 200, "text/html", "" );   }  );
 
 
-	server.on ( "/admin.html", []() { server.send ( 200, "text/html", PAGE_AdminMainPage );   }  );
+	server.on ( "/admin.html", []() { server.send_P ( 200, CONTENT_Html, PAGE_AdminMainPage );   }  );
 	server.on ( "/config.html", send_network_configuration_html );
-	server.on ( "/info.html", []() {  server.send ( 200, "text/html", PAGE_Information );   }  );
+	server.on ( "/info.html", []() {  server.send_P ( 200, CONTENT_Html, PAGE_Information );   }  );
 	server.on ( "/ntp.html", send_NTP_configuration_html  );
 	server.on ( "/general.html", send_general_html  );
-//	server.on ( "/example.html", []() { server.send ( 200, "text/html", PAGE_EXAMPLE );  } );
-	server.on ( "/style.css", []() { server.send ( 200, "text/plain", PAGE_Style_css );  } );
-	server.on ( "/microajax.js", []() { server.send ( 200, "text/plain", PAGE_microajax_js );  } );
+//	server.on ( "/example.html", []() { server.send_P ( 200, CONTENT_Html, PAGE_EXAMPLE );  } );
+	server.on ( "/style.css", []() { server.send_P ( 200, CONTENT_Plain, PAGE_Style_css );  } );
+	server.on ( "/microajax.js", []() { server.send_P ( 200, CONTENT_Plain, PAGE_microajax_js );  } );
 	server.on ( "/admin/values", send_network_configuration_values_html );
 	server.on ( "/admin/connectionstate", send_connection_state_values_html );
 	server.on ( "/admin/infovalues", send_information_values_html );

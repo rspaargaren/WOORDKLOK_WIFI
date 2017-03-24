@@ -25,6 +25,6 @@ void sendRootPage()
             
         }
     }
-    server.send ( 200, "text/html", PAGE_Root ); 
+    server.send_P ( 200, CONTENT_Html, PAGE_Root ); 
 }
  

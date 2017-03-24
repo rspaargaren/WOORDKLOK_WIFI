@@ -223,7 +223,7 @@ void processClock()
         }
          WriteClockConfig();
     }
-    server.send ( 200, "text/html", PAGE_Clock  ); 
+    server.send_P ( 200, CONTENT_Html, PAGE_Clock  ); 
 }
 
 
