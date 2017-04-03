@@ -88,6 +88,7 @@ void setup ( void ) {
     config.Notat = 1;
     config.LMin = 5;
     config.LMax = 100;
+    config.Transpd = 100;
     config.ClockMode = 150;
     config.TouchOnOff = true;
     config.TouchFil = 5;
