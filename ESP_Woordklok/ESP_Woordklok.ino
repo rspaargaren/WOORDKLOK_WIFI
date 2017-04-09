@@ -17,6 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
+#include <pgmspace.h>
+
 const char CONTENT_Html[] PROGMEM = R"=====(text/html)=====";
 const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 
@@ -61,6 +63,9 @@ Include the HTML, STYLE and Script "Pages"
 #endif
 
 ESP8266HTTPUpdateServer httpUpdater;
+
+void handle_log();
+void handle_reset();
 
 
 void setup ( void ) {
@@ -114,7 +119,7 @@ void setup ( void ) {
 	
 	if (AdminEnabled)
 	{
-		debug_print("Admin enabled. Starting access point: "ACCESS_POINT_NAME"; password: "ACCESS_POINT_PASSWORD);
+		debug_print("Admin enabled. Starting access point: " ACCESS_POINT_NAME "; password: " ACCESS_POINT_PASSWORD);
 		WiFi.mode(WIFI_AP_STA);
 		WiFi.softAP( ACCESS_POINT_NAME , ACCESS_POINT_PASSWORD);
 	}
