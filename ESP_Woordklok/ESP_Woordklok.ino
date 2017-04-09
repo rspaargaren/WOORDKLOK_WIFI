@@ -45,21 +45,13 @@ const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 #include "Page_General.h"
 #include "PAGE_NetworkConfiguration.h"
 #include "example.h"
-#include "Clock.h"
+#include "Page_Clock.h"
 #include "Page_Welcome.h"
+#include "debug.h"
 
 #define ACCESS_POINT_NAME  "WOORDKLOK"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
 #define AdminTimeOut 240
-
-//#define DEBUG 1
-#ifdef DEBUG
-#  define debug_print(x) Serial.println(x)
-#  define debug_statement(x) x
-#else
-#  define debug_print(x)
-#  define debug_statement(x)
-#endif
 
 ESP8266HTTPUpdateServer httpUpdater;
 

@@ -1,9 +1,8 @@
 #ifndef PAGE_CLOCK_H
 #define PAGE_CLOCK_H
+
 #include <TimeLib.h>
-//
-//   The EXAMPLE PAGE
-//
+
 const char PAGE_Clock[] PROGMEM = R"=====(
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -125,12 +124,10 @@ void filldynamicdataClock() {
 	server.send(200, "text/plain", values);
 }
 
-void processClock()
-
-{
+void processClock() {
 	int delaytijd = 100;
-	if (server.args() > 0)  // Are there any POST/GET Fields ?
-			{
+	// Are there any POST/GET Fields ?
+	if (server.args() > 0) {
 		for (uint8_t i = 0; i < server.args(); i++) { // Iterate through the fields
 			if (server.argName(i) == "Notat") {
 				// Your processing for the transmitted form-variable CLCOK NOTATIE
