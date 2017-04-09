@@ -18,11 +18,11 @@ struct strDateTime {
 long adjustDstEurope() {
 	// last sunday of march
 	int beginDSTDate = (31 - (5 * year() / 4 + 4) % 7);
-	//Serial.println(beginDSTDate);
+	//debug_print(beginDSTDate);
 	int beginDSTMonth = 3;
 	//last sunday of october
 	int endDSTDate = (31 - (5 * year() / 4 + 1) % 7);
-	//Serial.println(endDSTDate);
+	//debug_print(endDSTDate);
 	int endDSTMonth = 10;
 	// DST is valid as:
 	if (((month() > beginDSTMonth) && (month() < endDSTMonth))
@@ -42,8 +42,8 @@ boolean summertime(int year, byte month, byte day, byte hour, byte tzHours) {
 		return false; // keine Sommerzeit in Jan, Feb, Nov, Dez
 	if (month > 3 && month < 10)
 		return true; // Sommerzeit in Apr, Mai, Jun, Jul, Aug, Sep
-	if (month == 3 && (hour + 24 * day) >= (1 + tzHours + 24 * (31 - (5 * year / 4 + 4) % 7)) ||
-		 month == 10 && (hour + 24 * day) < (1 + tzHours + 24 * (31 - (5 * year / 4 + 1) % 7)))
+	if ((month == 3 && (hour + 24 * day) >= (1 + tzHours + 24 * (31 - (5 * year / 4 + 4) % 7))) ||
+		 (month == 10 && (hour + 24 * day) < (1 + tzHours + 24 * (31 - (5 * year / 4 + 1) % 7))))
 		return true;
 	else
 		return false;
@@ -106,8 +106,7 @@ long EEPROMReadlong(long address) {
 	return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
 }
 
-void ConvertUnixTimeStamp(unsigned long TimeStamp,
-		struct strDateTime* DateTime) {
+void ConvertUnixTimeStamp(unsigned long TimeStamp, struct strDateTime* DateTime) {
 	uint8_t year;
 	uint8_t month, monthLength;
 	uint32_t time;
@@ -135,7 +134,8 @@ void ConvertUnixTimeStamp(unsigned long TimeStamp,
 	month = 0;
 	monthLength = 0;
 	for (month = 0; month < 12; month++) {
-		if (month == 1) { // february
+		if (month == 1) {
+			// february
 			if (LEAP_YEAR(year)) {
 				monthLength = 29;
 			} else {
@@ -190,29 +190,14 @@ String urldecode(String input) {
 		if (c == '+')
 			c = ' ';
 		if (c == '%') {
-
 			t++;
 			c = input[t];
 			t++;
 			c = (h2int(c) << 4) | h2int(input[t]);
 		}
-
 		ret.concat(c);
 	}
 	return ret;
-
-}
-
-String FormatLight(int LMaxMin) {
-	String Light = "";
-	if (10 > LMaxMin)
-		Light = "00" + String(LMaxMin);
-	if (100 > LMaxMin && LMaxMin >= 10)
-		Light = "0" + String(LMaxMin);
-	if (LMaxMin >= 100)
-		Light = "100";
-	//Serial.print(Light);
-	return Light;
 }
 
 String FormatTime(int Tijd_Waarde) {

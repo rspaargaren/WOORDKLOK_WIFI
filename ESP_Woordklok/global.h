@@ -1,6 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
-#include "FS.h"
+
 #include <TimeLib.h>
 
 ESP8266WebServer server(80);									// The Webserver
@@ -58,19 +58,13 @@ struct strConfig {
 	int GetTimeMinute;
 } config;
 
-void WriteLogLine(String LogLine) {
-	File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
-	bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
-	bestand.close();
-}
-
 /*
  **
  ** CONFIGURATION HANDLING
  **
  */
 void ConfigureWifi() {
-	//Serial.println("Configuring Wifi");
+	debug_print("Configuring Wifi");
 	WiFi.begin(config.ssid.c_str(), config.password.c_str());
 	if (!config.dhcp) {
 		WiFi.config(
@@ -82,7 +76,7 @@ void ConfigureWifi() {
 }
 
 void WriteConfig() {
-	//Serial.println("Writing Config");
+	debug_print("Writing Config");
 	EEPROM.write(0, 'C');
 	EEPROM.write(1, 'F');
 	EEPROM.write(2, 'G');
@@ -131,7 +125,7 @@ void WriteConfig() {
 }
 
 void WriteClockConfig() {
-	//Serial.println("Writing Config");
+	debug_print("Writing Config");
 	EEPROM.write(450, config.SoundOnOff);
 	EEPROM.write(451, config.Notat);
 	EEPROM.write(452, config.LMin);
@@ -147,10 +141,9 @@ void WriteClockConfig() {
 }
 
 boolean ReadConfig() {
-	//Serial.println("Reading Configuration");
-	if (EEPROM.read(0) == 'C' && EEPROM.read(1) == 'F'
-			&& EEPROM.read(2) == 'G') {
-		//Serial.println("Configurarion Found!");
+	debug_print("Reading Configuration");
+	if (EEPROM.read(0) == 'C' && EEPROM.read(1) == 'F' && EEPROM.read(2) == 'G') {
+		debug_print("Configuration Found!");
 		config.dhcp = EEPROM.read(16);
 
 		config.daylight = EEPROM.read(17);
@@ -193,13 +186,13 @@ boolean ReadConfig() {
 		return true;
 
 	} else {
-		//Serial.println("Configurarion NOT FOUND!!!!");
+		debug_print("Configuration NOT found");
 		return false;
 	}
 }
 
 void ReadClockConfig() {
-	//Serial.println("Reading Clock Configuration");
+	debug_print("Reading Clock Configuration");
 	config.SoundOnOff = EEPROM.read(450);
 	config.Notat = EEPROM.read(451);
 	config.LMin = EEPROM.read(452);
@@ -211,8 +204,7 @@ void ReadClockConfig() {
 	config.TouchTrH = EEPROM.read(458);
 	config.TouchTiS = EEPROM.read(459);
 	config.TouchTiL = EEPROM.read(460);
-	//Serial.println("Clock Settings Read");
-	//return true;
+	debug_print("Clock Settings Read");
 }
 
 /*
@@ -301,44 +293,21 @@ void ResetLogFile() {
 
 void Update_Clock_Settings() {
 	int delaytijd = 100;
-	//Serial.println("update clock settings on startup");
+	debug_print("update clock settings on startup");
 	delay(delaytijd);
-	Serial.println("SET NOTAT " + (String) config.Notat);
-	WriteLogLine("SET NOTAT " + (String) config.Notat);
+	Clock::setNotation(config.Notat);
 	delay(delaytijd);
-	Serial.println("SET LMIN " + (String) config.LMin);
-	WriteLogLine("SET LMIN " + (String) config.LMin);
+	Clock::setLMin(config.LMin);
 	delay(delaytijd);
-	Serial.println("SET LMAX " + (String) config.LMax);
-	WriteLogLine("SET LMAX " + (String) config.LMax);
+	Clock::setLMax(config.LMax);
 	delay(delaytijd);
-	if (config.SoundOnOff) {
-		Serial.println("SET SOUND 1");
-		WriteLogLine("SET SOUND 1");
-	} else {
-		Serial.println("SET SOUND 0");
-		WriteLogLine("SET SOUND 0");
-	}
+	Clock::enableSound(config.SoundOnOff);
 	delay(delaytijd);
-	Serial.println(
-			"SET TOUCH " + (String) config.TouchFil + " "
-					+ (String) config.TouchTrH + " " + (String) config.TouchTrL + " "
-					+ (String) config.TouchTiS + " " + (String) config.TouchTiL);
-	WriteLogLine(
-			"SET TOUCH " + (String) config.TouchFil + " "
-					+ (String) config.TouchTrH + " " + (String) config.TouchTrL + " "
-					+ (String) config.TouchTiS + " " + (String) config.TouchTiL);
+	Clock::setTouch(config.TouchFil, config.TouchTrH, config.TouchTrL, config.TouchTiS, config.TouchTiL);
 	delay(delaytijd);
-	Serial.println(
-			"SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":"
-					+ FormatTime(second()));  // Aangepast aan timelib.h
-	WriteLogLine(
-			"SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":"
-					+ FormatTime(second()));    // Aangepast aan timelib.h
+	Clock::setTime();
 	delay(delaytijd);
-	Serial.println("SET MODE " + (String) config.ClockMode);
-	WriteLogLine("SET MODE " + (String) config.ClockMode);
-
+	Clock::setMode(config.ClockMode);
 }
 
 #endif

@@ -71,7 +71,7 @@ void send_information_values_html() {
 			+ (String) second() + " " + (String) year() + "-" + (String) month()
 			+ "-" + (String) day() + "|div\n";
 	server.send(200, "text/plain", values);
-	//Serial.println(__FUNCTION__); 
+	//debug_print(__FUNCTION__);
 
 }
 

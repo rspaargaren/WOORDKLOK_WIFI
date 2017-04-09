@@ -30,6 +30,7 @@ const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 #include <WiFiUdp.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include "helpers.h"
+#include "clock.h"
 #include "global.h"
 #include <TimeLib.h>
 #include "FS.h"
@@ -47,7 +48,7 @@ const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 #include "example.h"
 #include "Page_Clock.h"
 #include "Page_Welcome.h"
-#include "debug.h"
+#include "log.h"
 
 #define ACCESS_POINT_NAME  "WOORDKLOK"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
@@ -110,7 +111,6 @@ void setup(void) {
 		config.TouchTrH = 30;
 		config.TouchTiS = 10;
 		config.TouchTiL = 100;
-		WriteClockConfig;
 		debug_print("General config applied");
 	}
 	ReadClockConfig();
@@ -209,8 +209,8 @@ void loop(void) {
 				setTime(UnixTimestamp_adjusted); //Convert to TimeLIB Library
 
 				if (config.Clock_NTP_Update) {
-					Serial.println("SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()));
-					WriteLogLine("AUTO NTP SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute()) + ":" + FormatTime(second()));
+					WriteLogLine("AUTO NTP SET TIME");
+					Clock::setTime();
 				}
 			} else {
 				WriteLogLine("NTP FAILED UPDATE");
@@ -221,7 +221,7 @@ void loop(void) {
 	if (config.GetTimeMinute > 0) {
 		if (cGet_Time_Update > (config.GetTimeMinute * 60)) {
 			cGet_Time_Update = 0;
-			Serial.println("GET TIME");
+			Clock::getTime();
 			WriteLogLine("GET TIME ");
 		}
 	}
@@ -230,19 +230,14 @@ void loop(void) {
 		Minute_Old = minute();
 		if (config.AutoTurnOn) {
 			if (hour() == config.TurnOnHour && minute() == config.TurnOnMinute) {
-				Serial.println(
-						"SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute())
-								+ ":" + FormatTime(second()));
-				WriteLogLine(
-						"SET TIME " + FormatTime(hour()) + ":" + FormatTime(minute())
-								+ ":" + FormatTime(second()));
+				Clock::setTime();
 			}
 		}
 
 		Minute_Old = minute();
 		if (config.AutoTurnOff) {
 			if (hour() == config.TurnOffHour && minute() == config.TurnOffMinute) {
-				//Serial.println("SwitchOff");
+				//debug_print("SwitchOff");
 			}
 		}
 	}
@@ -261,8 +256,8 @@ void loop(void) {
 
 	if (Refresh) {
 		Refresh = false;
-		///Serial.println("Refreshing...");
-		//Serial.printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
+		//debug_print("Refreshing...");
+		debug_printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
 	}
 
 }

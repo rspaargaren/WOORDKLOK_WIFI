@@ -105,7 +105,7 @@ void send_devicename_value_html() {
 	String values = "";
 	values += "devicename|" + (String) config.DeviceName + "|div\n";
 	server.send(200, "text/plain", values);
-	//Serial.println(__FUNCTION__); 
+	//debug_print(__FUNCTION__);
 
 }
 
@@ -140,39 +140,32 @@ void send_general_html() {
 			if (server.argName(i) == "Get_Time")
 				config.GetTimeMinute = server.arg(i).toInt();
 			if (server.argName(i) == "bGet_Touch") {
-				Serial.println("GET TOUCH");
-				WriteLogLine("GET TOUCH");
+				Clock::getTouch();
 			}
 			if (server.argName(i) == "bGet_Sound") {
-				Serial.println("GET SOUND");
-				WriteLogLine("GET SOUND");
+				Clock::getSound();
 			}
 			if (server.argName(i) == "bGet_Light") {
-				Serial.println("GET LIGHT");
-				WriteLogLine("GET LIGHT");
+				Clock::getLight();
 			}
 			if (server.argName(i) == "bGet_Mode") {
-				Serial.println("GET MODE");
-				WriteLogLine("GET MODE");
+				Clock::getMode();
 			}
 			if (server.argName(i) == "bGet_Tcomp") {
-				Serial.println("GET TCOMP");
-				WriteLogLine("GET TCOMP");
+				Clock::getTComp();
 			}
 			if (server.argName(i) == "bGet_Time") {
-				Serial.println("GET TIME");
-				WriteLogLine("GET TIME");
+				Clock::getTime();
 			}
 			if (server.argName(i) == "bManual") {
-				Serial.println(String(server.arg("man_input")));
-				WriteLogLine(String(server.arg("man_input")));
+				Clock::customCmd(String(server.arg("man_input")));
 			}
 		}
 		WriteConfig();
 		//firstStart = true;
 	}
 	server.send_P(200, CONTENT_Html, PAGE_AdminGeneralSettings);
-	//Serial.println(__FUNCTION__); 
+	//debug_print(__FUNCTION__);
 
 }
 
@@ -194,5 +187,5 @@ void send_general_configuration_values_html() {
 	values += "Get_Time|" + (String) config.GetTimeMinute + "|input\n";
 
 	server.send(200, "text/plain", values);
-	//Serial.println(__FUNCTION__); 
+	//debug_print(__FUNCTION__);
 }

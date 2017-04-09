@@ -132,73 +132,41 @@ void processClock() {
 			if (server.argName(i) == "Notat") {
 				// Your processing for the transmitted form-variable CLCOK NOTATIE
 				config.Notat = server.arg(i).toInt();
-				Serial.println("SET NOTAT " + (String) server.arg(i).toInt());
-				WriteLogLine("SET NOTAT " + (String) server.arg(i).toInt());
+				Clock::setNotation(server.arg(i).toInt());
 			}
 			if (server.argName(i) == "Light_Min") {
 				// Your processing for the transmitted form-variable MINIMALE LICHT INTENSITEIT
 				config.LMin = server.arg(i).toInt();
 				delay(delaytijd);
-				Serial.println("SET LMIN " + (String) server.arg(i).toInt());
-				WriteLogLine("SET LMIN " + (String) server.arg(i).toInt());
+				Clock::setLMin(config.LMin);
 			}
 			if (server.argName(i) == "Light_Max") {
 				// Your processing for the transmitted form-variable MAXIMALE LICHT INTENSITEIT
 				config.LMax = server.arg(i).toInt();
 				delay(delaytijd);
-				Serial.println("SET LMAX " + (String) server.arg(i).toInt());
-				WriteLogLine("SET LMAX " + (String) server.arg(i).toInt());
+				Clock::setLMax(config.LMax);
 			}
 			if (server.argName(i) == "Sound") {
 				// Your processing for the transmitted form-variable GELUID AAN / UIT
-				if (server.arg(i) == "ON") {
-					config.SoundOnOff = true;
-					delay(delaytijd);
-					Serial.println("SET SOUND 1");
-					WriteLogLine("SET SOUND 1");
-				} else {
-					config.SoundOnOff = false;
-					delay(delaytijd);
-					Serial.println("SET SOUND 0");
-					WriteLogLine("SET SOUND 0");
-				}
-
+				config.SoundOnOff = server.arg(i) == "ON";
+				delay(delaytijd);
+				Clock::enableSound(config.SoundOnOff);
 			}
 			if (server.argName(i) == "Touch") {
 				// Your processing for the transmitted form-variable TOUCH AAN / UIT
-				if (server.arg(i) == "1") {
-					config.TouchOnOff = true;
-					delay(delaytijd);
-					Serial.println("SET TOUCH 1");
-					WriteLogLine("SET TOUCH 1");
-				} else {
-					config.TouchOnOff = false;
-					delay(delaytijd);
-					Serial.println("SET TOUCH 0");
-					WriteLogLine("SET TOUCH 0");
-				}
-
+				config.TouchOnOff = server.arg(i) == "1";
+				delay(delaytijd);
+				Clock::enableTouch(config.TouchOnOff);
 			}
 			if (server.argName(i) == "Update_Touch") {
 				if (server.arg(i) == "True") {
 					delay(delaytijd);
-					Serial.println(
-							"SET TOUCH " + server.arg("Touch_Fil") + " "
-									+ server.arg("Touch_Tr_High") + " "
-									+ server.arg("Touch_Tr_Low") + " "
-									+ server.arg("Touch_Ti_Short") + " "
-									+ server.arg("Touch_Ti_Long"));
-					WriteLogLine(
-							"SET TOUCH " + server.arg("Touch_Fil") + " "
-									+ server.arg("Touch_Tr_High") + " "
-									+ server.arg("Touch_Tr_Low") + " "
-									+ server.arg("Touch_Ti_Short") + " "
-									+ server.arg("Touch_Ti_Long"));
 					config.TouchFil = server.arg("Touch_Fil").toInt();
 					config.TouchTrH = server.arg("Touch_Tr_High").toInt();
 					config.TouchTrL = server.arg("Touch_Tr_Low").toInt();
 					config.TouchTiS = server.arg("Touch_Ti_Short").toInt();
 					config.TouchTiL = server.arg("Touch_Ti_Long").toInt();
+					Clock::setTouch(config.TouchFil, config.TouchTrH, config.TouchTrL, config.TouchTiS, config.TouchTiL);
 				}
 			}
 
@@ -206,24 +174,18 @@ void processClock() {
 				// Your processing for the transmitted form-variable TIJDSINSTELLING
 				if (server.arg(i) == "True") {
 					delay(delaytijd);
-					Serial.println(
-							"SET TIME " + FormatTime(server.arg("Time_Hrs").toInt())
-									+ ":" + FormatTime(server.arg("Time_Min").toInt())
-									+ ":" + FormatTime(server.arg("Time_Sec").toInt()));
-					WriteLogLine(
-							"SET TIME " + FormatTime(server.arg("Time_Hrs").toInt())
-									+ ":" + FormatTime(server.arg("Time_Min").toInt())
-									+ ":" + FormatTime(server.arg("Time_Sec").toInt()));
+					int hour = server.arg("Time_Hrs").toInt();
+					int minute = server.arg("Time_Min").toInt();
+					int second = server.arg("Time_Sec").toInt();
+					Clock::setTime(hour, minute, second);
 				}
 			}
 			if (server.argName(i) == "Clock_Mode") {
 				// Your processing for the transmitted form-variable OVERGANGSMODUS
 				config.ClockMode = server.arg(i).toInt();
 				delay(delaytijd);
-				Serial.println("SET MODE " + server.arg(i));
-				WriteLogLine("SET MODE " + server.arg(i));
+				Clock::setMode(config.ClockMode);
 			}
-
 		}
 		WriteClockConfig();
 	}
