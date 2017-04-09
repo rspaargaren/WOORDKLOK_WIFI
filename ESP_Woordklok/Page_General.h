@@ -2,7 +2,7 @@
 //  HTML PAGE
 //
 
-const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
+const char PAGE_AdminGeneralSettings[] PROGMEM = R"=====(
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <a href="admin.html"  class="btn btn--s"><</a>&nbsp;&nbsp;<strong>General Settings</strong>
@@ -99,92 +99,100 @@ function load(e,t,n){if("js"==t){var a=document.createElement("script");a.src=e,
 </script>
 )=====";
 
-
 // Functions for this Page
-void send_devicename_value_html()
-{
-		
-	String values ="";
+void send_devicename_value_html() {
+
+	String values = "";
 	values += "devicename|" + (String) config.DeviceName + "|div\n";
-	server.send ( 200, "text/plain", values);
+	server.send(200, "text/plain", values);
 	//Serial.println(__FUNCTION__); 
-	
+
 }
 
-void send_general_html()
-{
-	
-	if (server.args() > 0 )  // Save Settings
-	{
+void send_general_html() {
+
+	if (server.args() > 0)  // Save Settings
+			{
 		config.AutoTurnOn = false;
 		config.AutoTurnOff = false;
-    config.AutoStart = false;
-    config.Clock_NTP_Update = false;
+		config.AutoStart = false;
+		config.Clock_NTP_Update = false;
 		String temp = "";
-		for ( uint8_t i = 0; i < server.args(); i++ ) {
-			if (server.argName(i) == "devicename") config.DeviceName = urldecode(server.arg(i)); 
-			if (server.argName(i) == "tonenabled") config.AutoTurnOn = true; 
-			if (server.argName(i) == "toffenabled") config.AutoTurnOff = true; 
-			if (server.argName(i) == "tonhour") config.TurnOnHour =  server.arg(i).toInt(); 
-			if (server.argName(i) == "tonminute") config.TurnOnMinute =  server.arg(i).toInt(); 
-			if (server.argName(i) == "toffhour") config.TurnOffHour =  server.arg(i).toInt(); 
-			if (server.argName(i) == "toffminute") config.TurnOffMinute =  server.arg(i).toInt(); 
-      if (server.argName(i) == "Update_Start") config.AutoStart = true; 
-      if (server.argName(i) == "Update_NTP") config.Clock_NTP_Update = true;
-      if (server.argName(i) == "Get_Time") config.GetTimeMinute =  server.arg(i).toInt();
-      if (server.argName(i) == "bGet_Touch") {
-        Serial.println("GET TOUCH");
-        WriteLogLine("GET TOUCH");
-      }
-      if (server.argName(i) == "bGet_Sound") {
-        Serial.println("GET SOUND");
-        WriteLogLine("GET SOUND");
-      }
-      if (server.argName(i) == "bGet_Light") {
-        Serial.println("GET LIGHT");
-        WriteLogLine("GET LIGHT");
-      }
-      if (server.argName(i) == "bGet_Mode") {
-        Serial.println("GET MODE");
-        WriteLogLine("GET MODE");
-      }
-      if (server.argName(i) == "bGet_Tcomp") {
-        Serial.println("GET TCOMP");
-        WriteLogLine("GET TCOMP");
-      }
-      if (server.argName(i) == "bGet_Time") {
-        Serial.println("GET TIME");
-        WriteLogLine("GET TIME");
-      }
-      if (server.argName(i) == "bManual") {
-        Serial.println(String(server.arg("man_input")));
-        WriteLogLine(String(server.arg("man_input")));
-      }
+		for (uint8_t i = 0; i < server.args(); i++) {
+			if (server.argName(i) == "devicename")
+				config.DeviceName = urldecode(server.arg(i));
+			if (server.argName(i) == "tonenabled")
+				config.AutoTurnOn = true;
+			if (server.argName(i) == "toffenabled")
+				config.AutoTurnOff = true;
+			if (server.argName(i) == "tonhour")
+				config.TurnOnHour = server.arg(i).toInt();
+			if (server.argName(i) == "tonminute")
+				config.TurnOnMinute = server.arg(i).toInt();
+			if (server.argName(i) == "toffhour")
+				config.TurnOffHour = server.arg(i).toInt();
+			if (server.argName(i) == "toffminute")
+				config.TurnOffMinute = server.arg(i).toInt();
+			if (server.argName(i) == "Update_Start")
+				config.AutoStart = true;
+			if (server.argName(i) == "Update_NTP")
+				config.Clock_NTP_Update = true;
+			if (server.argName(i) == "Get_Time")
+				config.GetTimeMinute = server.arg(i).toInt();
+			if (server.argName(i) == "bGet_Touch") {
+				Serial.println("GET TOUCH");
+				WriteLogLine("GET TOUCH");
+			}
+			if (server.argName(i) == "bGet_Sound") {
+				Serial.println("GET SOUND");
+				WriteLogLine("GET SOUND");
+			}
+			if (server.argName(i) == "bGet_Light") {
+				Serial.println("GET LIGHT");
+				WriteLogLine("GET LIGHT");
+			}
+			if (server.argName(i) == "bGet_Mode") {
+				Serial.println("GET MODE");
+				WriteLogLine("GET MODE");
+			}
+			if (server.argName(i) == "bGet_Tcomp") {
+				Serial.println("GET TCOMP");
+				WriteLogLine("GET TCOMP");
+			}
+			if (server.argName(i) == "bGet_Time") {
+				Serial.println("GET TIME");
+				WriteLogLine("GET TIME");
+			}
+			if (server.argName(i) == "bManual") {
+				Serial.println(String(server.arg("man_input")));
+				WriteLogLine(String(server.arg("man_input")));
+			}
 		}
 		WriteConfig();
 		//firstStart = true;
 	}
-	server.send_P ( 200, CONTENT_Html, PAGE_AdminGeneralSettings ); 
+	server.send_P(200, CONTENT_Html, PAGE_AdminGeneralSettings);
 	//Serial.println(__FUNCTION__); 
-	
-	
+
 }
 
-void send_general_configuration_values_html()
-{
-	String values ="";
-	values += "devicename|" +  (String)  config.DeviceName +  "|input\n";
-	values += "tonhour|" +  (String)  config.TurnOnHour +  "|input\n";
-	values += "tonminute|" +   (String) config.TurnOnMinute +  "|input\n";
-	values += "toffhour|" +  (String)  config.TurnOffHour +  "|input\n";
-	values += "toffminute|" +   (String)  config.TurnOffMinute +  "|input\n";
-	values += "toffenabled|" +  (String) (config.AutoTurnOff ? "checked" : "") + "|chk\n";
-	values += "tonenabled|" +  (String) (config.AutoTurnOn ? "checked" : "") + "|chk\n";
-  values += "Update_Start|" +  (String) (config.AutoStart ? "checked" : "") + "|chk\n";
-  values += "Update_NTP|" +  (String) (config.Clock_NTP_Update ? "checked" : "") + "|chk\n";
-  values += "Get_Time|" +   (String)  config.GetTimeMinute +  "|input\n";
-  
-  
-	server.send ( 200, "text/plain", values);
+void send_general_configuration_values_html() {
+	String values = "";
+	values += "devicename|" + (String) config.DeviceName + "|input\n";
+	values += "tonhour|" + (String) config.TurnOnHour + "|input\n";
+	values += "tonminute|" + (String) config.TurnOnMinute + "|input\n";
+	values += "toffhour|" + (String) config.TurnOffHour + "|input\n";
+	values += "toffminute|" + (String) config.TurnOffMinute + "|input\n";
+	values += "toffenabled|" + (String) (config.AutoTurnOff ? "checked" : "")
+			+ "|chk\n";
+	values += "tonenabled|" + (String) (config.AutoTurnOn ? "checked" : "")
+			+ "|chk\n";
+	values += "Update_Start|" + (String) (config.AutoStart ? "checked" : "")
+			+ "|chk\n";
+	values += "Update_NTP|" + (String) (config.Clock_NTP_Update ? "checked" : "")
+			+ "|chk\n";
+	values += "Get_Time|" + (String) config.GetTimeMinute + "|input\n";
+
+	server.send(200, "text/plain", values);
 	//Serial.println(__FUNCTION__); 
 }

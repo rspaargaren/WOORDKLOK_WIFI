@@ -1,6 +1,5 @@
 
-
-    //
+//
 //  HTML PAGE
 //
 const char PAGE_NetworkConfiguration[] PROGMEM = R"=====(
@@ -68,138 +67,155 @@ const char PAGE_WaitAndReload[] PROGMEM = R"=====(
 Please Wait....Configuring and Restarting.
 )=====";
 
-
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES
 // 
 
-void send_network_configuration_html()
-{
-	
-	if (server.args() > 0 )  // Save Settings
-	{
+void send_network_configuration_html() {
+
+	if (server.args() > 0)  // Save Settings
+			{
 		String temp = "";
 		config.dhcp = false;
-		for ( uint8_t i = 0; i < server.args(); i++ ) {
-			if (server.argName(i) == "ssid") config.ssid =   urldecode(server.arg(i));
-			if (server.argName(i) == "password") config.password =    urldecode(server.arg(i)); 
-			if (server.argName(i) == "ip_0") if (checkRange(server.arg(i))) 	config.IP[0] =  server.arg(i).toInt();
-			if (server.argName(i) == "ip_1") if (checkRange(server.arg(i))) 	config.IP[1] =  server.arg(i).toInt();
-			if (server.argName(i) == "ip_2") if (checkRange(server.arg(i))) 	config.IP[2] =  server.arg(i).toInt();
-			if (server.argName(i) == "ip_3") if (checkRange(server.arg(i))) 	config.IP[3] =  server.arg(i).toInt();
-			if (server.argName(i) == "nm_0") if (checkRange(server.arg(i))) 	config.Netmask[0] =  server.arg(i).toInt();
-			if (server.argName(i) == "nm_1") if (checkRange(server.arg(i))) 	config.Netmask[1] =  server.arg(i).toInt();
-			if (server.argName(i) == "nm_2") if (checkRange(server.arg(i))) 	config.Netmask[2] =  server.arg(i).toInt();
-			if (server.argName(i) == "nm_3") if (checkRange(server.arg(i))) 	config.Netmask[3] =  server.arg(i).toInt();
-			if (server.argName(i) == "gw_0") if (checkRange(server.arg(i))) 	config.Gateway[0] =  server.arg(i).toInt();
-			if (server.argName(i) == "gw_1") if (checkRange(server.arg(i))) 	config.Gateway[1] =  server.arg(i).toInt();
-			if (server.argName(i) == "gw_2") if (checkRange(server.arg(i))) 	config.Gateway[2] =  server.arg(i).toInt();
-			if (server.argName(i) == "gw_3") if (checkRange(server.arg(i))) 	config.Gateway[3] =  server.arg(i).toInt();
-			if (server.argName(i) == "dhcp") config.dhcp = true;
+		for (uint8_t i = 0; i < server.args(); i++) {
+			if (server.argName(i) == "ssid")
+				config.ssid = urldecode(server.arg(i));
+			if (server.argName(i) == "password")
+				config.password = urldecode(server.arg(i));
+			if (server.argName(i) == "ip_0")
+				if (checkRange(server.arg(i)))
+					config.IP[0] = server.arg(i).toInt();
+			if (server.argName(i) == "ip_1")
+				if (checkRange(server.arg(i)))
+					config.IP[1] = server.arg(i).toInt();
+			if (server.argName(i) == "ip_2")
+				if (checkRange(server.arg(i)))
+					config.IP[2] = server.arg(i).toInt();
+			if (server.argName(i) == "ip_3")
+				if (checkRange(server.arg(i)))
+					config.IP[3] = server.arg(i).toInt();
+			if (server.argName(i) == "nm_0")
+				if (checkRange(server.arg(i)))
+					config.Netmask[0] = server.arg(i).toInt();
+			if (server.argName(i) == "nm_1")
+				if (checkRange(server.arg(i)))
+					config.Netmask[1] = server.arg(i).toInt();
+			if (server.argName(i) == "nm_2")
+				if (checkRange(server.arg(i)))
+					config.Netmask[2] = server.arg(i).toInt();
+			if (server.argName(i) == "nm_3")
+				if (checkRange(server.arg(i)))
+					config.Netmask[3] = server.arg(i).toInt();
+			if (server.argName(i) == "gw_0")
+				if (checkRange(server.arg(i)))
+					config.Gateway[0] = server.arg(i).toInt();
+			if (server.argName(i) == "gw_1")
+				if (checkRange(server.arg(i)))
+					config.Gateway[1] = server.arg(i).toInt();
+			if (server.argName(i) == "gw_2")
+				if (checkRange(server.arg(i)))
+					config.Gateway[2] = server.arg(i).toInt();
+			if (server.argName(i) == "gw_3")
+				if (checkRange(server.arg(i)))
+					config.Gateway[3] = server.arg(i).toInt();
+			if (server.argName(i) == "dhcp")
+				config.dhcp = true;
 		}
-		 server.send_P ( 200, CONTENT_Html, PAGE_WaitAndReload );
+		server.send_P(200, CONTENT_Html, PAGE_WaitAndReload);
 		WriteConfig();
 		ConfigureWifi();
-		AdminTimeOutCounter=0;
-		
-	}
-	else
-	{
-		server.send_P ( 200, CONTENT_Html, PAGE_NetworkConfiguration ); 
+		AdminTimeOutCounter = 0;
+
+	} else {
+		server.send_P(200, CONTENT_Html, PAGE_NetworkConfiguration);
 	}
 	//Serial.println(__FUNCTION__); 
 }
-
-
 
 //
 //   FILL THE PAGE WITH VALUES
 //
 
-void send_network_configuration_values_html()
-{
+void send_network_configuration_values_html() {
 
-	String values ="";
+	String values = "";
 
 	values += "ssid|" + (String) config.ssid + "|input\n";
-	values += "password|" +  (String) config.password + "|input\n";
-	values += "ip_0|" +  (String) config.IP[0] + "|input\n";
-	values += "ip_1|" +  (String) config.IP[1] + "|input\n";
-	values += "ip_2|" +  (String) config.IP[2] + "|input\n";
-	values += "ip_3|" +  (String) config.IP[3] + "|input\n";
-	values += "nm_0|" +  (String) config.Netmask[0] + "|input\n";
-	values += "nm_1|" +  (String) config.Netmask[1] + "|input\n";
-	values += "nm_2|" +  (String) config.Netmask[2] + "|input\n";
-	values += "nm_3|" +  (String) config.Netmask[3] + "|input\n";
-	values += "gw_0|" +  (String) config.Gateway[0] + "|input\n";
-	values += "gw_1|" +  (String) config.Gateway[1] + "|input\n";
-	values += "gw_2|" +  (String) config.Gateway[2] + "|input\n";
-	values += "gw_3|" +  (String) config.Gateway[3] + "|input\n";
-	values += "dhcp|" +  (String) (config.dhcp ? "checked" : "") + "|chk\n";
-	server.send ( 200, "text/plain", values);
+	values += "password|" + (String) config.password + "|input\n";
+	values += "ip_0|" + (String) config.IP[0] + "|input\n";
+	values += "ip_1|" + (String) config.IP[1] + "|input\n";
+	values += "ip_2|" + (String) config.IP[2] + "|input\n";
+	values += "ip_3|" + (String) config.IP[3] + "|input\n";
+	values += "nm_0|" + (String) config.Netmask[0] + "|input\n";
+	values += "nm_1|" + (String) config.Netmask[1] + "|input\n";
+	values += "nm_2|" + (String) config.Netmask[2] + "|input\n";
+	values += "nm_3|" + (String) config.Netmask[3] + "|input\n";
+	values += "gw_0|" + (String) config.Gateway[0] + "|input\n";
+	values += "gw_1|" + (String) config.Gateway[1] + "|input\n";
+	values += "gw_2|" + (String) config.Gateway[2] + "|input\n";
+	values += "gw_3|" + (String) config.Gateway[3] + "|input\n";
+	values += "dhcp|" + (String) (config.dhcp ? "checked" : "") + "|chk\n";
+	server.send(200, "text/plain", values);
 	//Serial.println(__FUNCTION__); 
-	
-}
 
+}
 
 //
 //   FILL THE PAGE WITH NETWORKSTATE & NETWORKS
 //
 
-void send_connection_state_values_html()
-{
+void send_connection_state_values_html() {
 
 	String state = "N/A";
 	String Networks = "";
-	if (WiFi.status() == 0) state = "Idle";
-	else if (WiFi.status() == 1) state = "NO SSID AVAILBLE";
-	else if (WiFi.status() == 2) state = "SCAN COMPLETED";
-	else if (WiFi.status() == 3) state = "CONNECTED";
-	else if (WiFi.status() == 4) state = "CONNECT FAILED";
-	else if (WiFi.status() == 5) state = "CONNECTION LOST";
-	else if (WiFi.status() == 6) state = "DISCONNECTED";
+	if (WiFi.status() == 0)
+		state = "Idle";
+	else if (WiFi.status() == 1)
+		state = "NO SSID AVAILBLE";
+	else if (WiFi.status() == 2)
+		state = "SCAN COMPLETED";
+	else if (WiFi.status() == 3)
+		state = "CONNECTED";
+	else if (WiFi.status() == 4)
+		state = "CONNECT FAILED";
+	else if (WiFi.status() == 5)
+		state = "CONNECTION LOST";
+	else if (WiFi.status() == 6)
+		state = "DISCONNECTED";
 
+	int n = WiFi.scanNetworks();
 
+	if (n == 0) {
+		Networks = "<font color='#FF0000'>No networks found!</font>";
+	} else {
 
-	 int n = WiFi.scanNetworks();
- 
-	 if (n == 0)
-	 {
-		 Networks = "<font color='#FF0000'>No networks found!</font>";
-	 }
-	else
-    {
-	 
-		
-		Networks = "Found " +String(n) + " Networks<br>";
+		Networks = "Found " + String(n) + " Networks<br>";
 		Networks += "<table border='0' cellspacing='0' cellpadding='3'>";
-		Networks += "<tr bgcolor='#DDDDDD' ><td><strong>Name</strong></td><td><strong>Quality</strong></td><td><strong>Enc</strong></td><tr>";
-		for (int i = 0; i < n; ++i)
-		{
-			int quality=0;
-			if(WiFi.RSSI(i) <= -100)
-			{
-					quality = 0;
-			}
-			else if(WiFi.RSSI(i) >= -50)
-			{
-					quality = 100;
-			}
-			else
-			{
+		Networks +=
+				"<tr bgcolor='#DDDDDD' ><td><strong>Name</strong></td><td><strong>Quality</strong></td><td><strong>Enc</strong></td><tr>";
+		for (int i = 0; i < n; ++i) {
+			int quality = 0;
+			if (WiFi.RSSI(i) <= -100) {
+				quality = 0;
+			} else if (WiFi.RSSI(i) >= -50) {
+				quality = 100;
+			} else {
 				quality = 2 * (WiFi.RSSI(i) + 100);
 			}
 
-
-			Networks += "<tr><td><a href='javascript:selssid(\""  +  String(WiFi.SSID(i))  + "\")'>"  +  String(WiFi.SSID(i))  + "</a></td><td>" +  String(quality) + "%</td><td>" +  String((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*")  + "</td></tr>";
+			Networks += "<tr><td><a href='javascript:selssid(\""
+					+ String(WiFi.SSID(i)) + "\")'>" + String(WiFi.SSID(i))
+					+ "</a></td><td>" + String(quality) + "%</td><td>"
+					+ String((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*")
+					+ "</td></tr>";
 		}
 		Networks += "</table>";
 	}
-   
-	String values ="";
-	values += "connectionstate|" +  state + "|div\n";
-	values += "networks|" +  Networks + "|div\n";
-	server.send ( 200, "text/plain", values);
+
+	String values = "";
+	values += "connectionstate|" + state + "|div\n";
+	values += "networks|" + Networks + "|div\n";
+	server.send(200, "text/plain", values);
 	//Serial.println(__FUNCTION__); 
-	
+
 }

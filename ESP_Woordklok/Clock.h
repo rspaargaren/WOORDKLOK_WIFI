@@ -101,129 +101,135 @@ const char PAGE_Clock[] PROGMEM = R"=====(
 )=====";
 #endif
 
-
-void filldynamicdataClock()
-{        
-    String values ="";
-    if (config.SoundOnOff == true) values += "Sound_ON| checked |chk\n";
-    else values += "Sound_OFF| checked |chk\n";
-    if (config.Notat == 1) values += "Notat_1| checked |chk\n";
-    else values += "Notat_5| checked |chk\n";
-    values += "Light_Min|" +  String(config.LMin) + "|input\n";
-    values += "Light_Max|" +  String(config.LMax) + "|input\n";
-    values += "Time_Hrs|" +  (String) hour() + "|input\n"; //(String) DateTime.hour + "|input\n";
-    values += "Time_Min|" +  (String) minute() + "|input\n"; //(String) DateTime.minute + "|input\n";
-    values += "Time_Sec|" +  (String) second() + "|input\n"; //(String) DateTime.second + "|input\n";
-    values += "Clock_Mode|" +  String(config.ClockMode) + "|input\n";
-    values += "Touch_Fil|" +  (String) config.TouchFil + "|input\n";
-    values += "Touch_Tr_High|" +  (String) config.TouchTrH + "|input\n";
-    values += "Touch_Tr_Low|" +  (String) config.TouchTrL + "|input\n";
-    values += "Touch_Ti_Short|" +  (String) config.TouchTiS + "|input\n";
-    values += "Touch_Ti_Long|" +  (String) config.TouchTiL + "|input\n";
-    server.send ( 200, "text/plain", values);    
+void filldynamicdataClock() {
+	String values = "";
+	if (config.SoundOnOff == true)
+		values += "Sound_ON| checked |chk\n";
+	else
+		values += "Sound_OFF| checked |chk\n";
+	if (config.Notat == 1)
+		values += "Notat_1| checked |chk\n";
+	else
+		values += "Notat_5| checked |chk\n";
+	values += "Light_Min|" + String(config.LMin) + "|input\n";
+	values += "Light_Max|" + String(config.LMax) + "|input\n";
+	values += "Time_Hrs|" + (String) hour() + "|input\n"; //(String) DateTime.hour + "|input\n";
+	values += "Time_Min|" + (String) minute() + "|input\n"; //(String) DateTime.minute + "|input\n";
+	values += "Time_Sec|" + (String) second() + "|input\n"; //(String) DateTime.second + "|input\n";
+	values += "Clock_Mode|" + String(config.ClockMode) + "|input\n";
+	values += "Touch_Fil|" + (String) config.TouchFil + "|input\n";
+	values += "Touch_Tr_High|" + (String) config.TouchTrH + "|input\n";
+	values += "Touch_Tr_Low|" + (String) config.TouchTrL + "|input\n";
+	values += "Touch_Ti_Short|" + (String) config.TouchTiS + "|input\n";
+	values += "Touch_Ti_Long|" + (String) config.TouchTiL + "|input\n";
+	server.send(200, "text/plain", values);
 }
 
 void processClock()
 
-{ 
-  int delaytijd = 100;    
-    if (server.args() > 0 )  // Are there any POST/GET Fields ? 
-    {
-       for ( uint8_t i = 0; i < server.args(); i++ ) {  // Iterate through the fields
-            if (server.argName(i) == "Notat") 
-            {
-                 // Your processing for the transmitted form-variable CLCOK NOTATIE 
-                 config.Notat = server.arg(i).toInt();
-                 Serial.println("SET NOTAT " + (String) server.arg(i).toInt());
-                 WriteLogLine("SET NOTAT " + (String) server.arg(i).toInt());
-            }
-            if (server.argName(i) == "Light_Min") 
-            {
-                 // Your processing for the transmitted form-variable MINIMALE LICHT INTENSITEIT
-                 config.LMin = server.arg(i).toInt();
-                 delay(delaytijd);
-                 Serial.println("SET LMIN " + (String) server.arg(i).toInt());
-                 WriteLogLine("SET LMIN " + (String) server.arg(i).toInt());
-            }
-            if (server.argName(i) == "Light_Max") 
-            {
-                 // Your processing for the transmitted form-variable MAXIMALE LICHT INTENSITEIT
-                 config.LMax = server.arg(i).toInt();
-                 delay(delaytijd);
-                 Serial.println("SET LMAX " + (String) server.arg(i).toInt());
-                 WriteLogLine("SET LMAX " + (String) server.arg(i).toInt());
-            }
-            if (server.argName(i) == "Sound") 
-            {
-                 // Your processing for the transmitted form-variable GELUID AAN / UIT
-                 if (server.arg(i) == "ON") { 
-                    config.SoundOnOff = true;
-                    delay(delaytijd);
-                    Serial.println("SET SOUND 1");
-                    WriteLogLine("SET SOUND 1");
-                 }
-                 else {
-                    config.SoundOnOff = false;
-                    delay(delaytijd);
-                    Serial.println("SET SOUND 0");
-                    WriteLogLine("SET SOUND 0");
-                 }
-                 
-            }
-            if (server.argName(i) == "Touch") 
-            {
-                 // Your processing for the transmitted form-variable TOUCH AAN / UIT
-                 if (server.arg(i) == "1") { 
-                    config.TouchOnOff = true;
-                    delay(delaytijd);
-                    Serial.println("SET TOUCH 1");
-                    WriteLogLine("SET TOUCH 1");
-                 }
-                 else {
-                    config.TouchOnOff = false;
-                    delay(delaytijd);
-                    Serial.println("SET TOUCH 0");
-                    WriteLogLine("SET TOUCH 0");
-                 }
-                 
-            }
-            if (server.argName(i) == "Update_Touch")
-            {
-                if (server.arg(i) == "True")
-                {
-                  delay(delaytijd);
-                  Serial.println ("SET TOUCH " + server.arg("Touch_Fil") + " " + server.arg("Touch_Tr_High") + " " + server.arg("Touch_Tr_Low") + " " + server.arg("Touch_Ti_Short") + " " + server.arg("Touch_Ti_Long"));
-                  WriteLogLine ("SET TOUCH " + server.arg("Touch_Fil") + " " + server.arg("Touch_Tr_High") + " " + server.arg("Touch_Tr_Low") + " " + server.arg("Touch_Ti_Short") + " " + server.arg("Touch_Ti_Long"));
-                  config.TouchFil = server.arg("Touch_Fil").toInt();
-                  config.TouchTrH = server.arg("Touch_Tr_High").toInt();
-                  config.TouchTrL = server.arg("Touch_Tr_Low").toInt();
-                  config.TouchTiS = server.arg("Touch_Ti_Short").toInt();
-                  config.TouchTiL = server.arg("Touch_Ti_Long").toInt();
-                }
-            }
-            
-            if (server.argName(i) == "Update_Tijd") 
-            {
-                 // Your processing for the transmitted form-variable TIJDSINSTELLING
-                 if (server.arg(i) == "True") {
-                  delay(delaytijd);
-                  Serial.println ("SET TIME " + FormatTime(server.arg("Time_Hrs").toInt()) + ":" + FormatTime(server.arg("Time_Min").toInt()) + ":" + FormatTime(server.arg("Time_Sec").toInt()) );
-                  WriteLogLine ("SET TIME " + FormatTime(server.arg("Time_Hrs").toInt()) + ":" + FormatTime(server.arg("Time_Min").toInt()) + ":" + FormatTime(server.arg("Time_Sec").toInt()) );
-                 }
-            }
-            if (server.argName(i) == "Clock_Mode") 
-            {
-                 // Your processing for the transmitted form-variable OVERGANGSMODUS
-                 config.ClockMode = server.arg(i).toInt();
-                 delay(delaytijd);
-                 Serial.println("SET MODE " + server.arg(i));
-                 WriteLogLine("SET MODE " + server.arg(i));
-            }
-           
-        }
-         WriteClockConfig();
-    }
-    server.send_P ( 200, CONTENT_Html, PAGE_Clock  ); 
-}
+{
+	int delaytijd = 100;
+	if (server.args() > 0)  // Are there any POST/GET Fields ?
+			{
+		for (uint8_t i = 0; i < server.args(); i++) { // Iterate through the fields
+			if (server.argName(i) == "Notat") {
+				// Your processing for the transmitted form-variable CLCOK NOTATIE
+				config.Notat = server.arg(i).toInt();
+				Serial.println("SET NOTAT " + (String) server.arg(i).toInt());
+				WriteLogLine("SET NOTAT " + (String) server.arg(i).toInt());
+			}
+			if (server.argName(i) == "Light_Min") {
+				// Your processing for the transmitted form-variable MINIMALE LICHT INTENSITEIT
+				config.LMin = server.arg(i).toInt();
+				delay(delaytijd);
+				Serial.println("SET LMIN " + (String) server.arg(i).toInt());
+				WriteLogLine("SET LMIN " + (String) server.arg(i).toInt());
+			}
+			if (server.argName(i) == "Light_Max") {
+				// Your processing for the transmitted form-variable MAXIMALE LICHT INTENSITEIT
+				config.LMax = server.arg(i).toInt();
+				delay(delaytijd);
+				Serial.println("SET LMAX " + (String) server.arg(i).toInt());
+				WriteLogLine("SET LMAX " + (String) server.arg(i).toInt());
+			}
+			if (server.argName(i) == "Sound") {
+				// Your processing for the transmitted form-variable GELUID AAN / UIT
+				if (server.arg(i) == "ON") {
+					config.SoundOnOff = true;
+					delay(delaytijd);
+					Serial.println("SET SOUND 1");
+					WriteLogLine("SET SOUND 1");
+				} else {
+					config.SoundOnOff = false;
+					delay(delaytijd);
+					Serial.println("SET SOUND 0");
+					WriteLogLine("SET SOUND 0");
+				}
 
+			}
+			if (server.argName(i) == "Touch") {
+				// Your processing for the transmitted form-variable TOUCH AAN / UIT
+				if (server.arg(i) == "1") {
+					config.TouchOnOff = true;
+					delay(delaytijd);
+					Serial.println("SET TOUCH 1");
+					WriteLogLine("SET TOUCH 1");
+				} else {
+					config.TouchOnOff = false;
+					delay(delaytijd);
+					Serial.println("SET TOUCH 0");
+					WriteLogLine("SET TOUCH 0");
+				}
+
+			}
+			if (server.argName(i) == "Update_Touch") {
+				if (server.arg(i) == "True") {
+					delay(delaytijd);
+					Serial.println(
+							"SET TOUCH " + server.arg("Touch_Fil") + " "
+									+ server.arg("Touch_Tr_High") + " "
+									+ server.arg("Touch_Tr_Low") + " "
+									+ server.arg("Touch_Ti_Short") + " "
+									+ server.arg("Touch_Ti_Long"));
+					WriteLogLine(
+							"SET TOUCH " + server.arg("Touch_Fil") + " "
+									+ server.arg("Touch_Tr_High") + " "
+									+ server.arg("Touch_Tr_Low") + " "
+									+ server.arg("Touch_Ti_Short") + " "
+									+ server.arg("Touch_Ti_Long"));
+					config.TouchFil = server.arg("Touch_Fil").toInt();
+					config.TouchTrH = server.arg("Touch_Tr_High").toInt();
+					config.TouchTrL = server.arg("Touch_Tr_Low").toInt();
+					config.TouchTiS = server.arg("Touch_Ti_Short").toInt();
+					config.TouchTiL = server.arg("Touch_Ti_Long").toInt();
+				}
+			}
+
+			if (server.argName(i) == "Update_Tijd") {
+				// Your processing for the transmitted form-variable TIJDSINSTELLING
+				if (server.arg(i) == "True") {
+					delay(delaytijd);
+					Serial.println(
+							"SET TIME " + FormatTime(server.arg("Time_Hrs").toInt())
+									+ ":" + FormatTime(server.arg("Time_Min").toInt())
+									+ ":" + FormatTime(server.arg("Time_Sec").toInt()));
+					WriteLogLine(
+							"SET TIME " + FormatTime(server.arg("Time_Hrs").toInt())
+									+ ":" + FormatTime(server.arg("Time_Min").toInt())
+									+ ":" + FormatTime(server.arg("Time_Sec").toInt()));
+				}
+			}
+			if (server.argName(i) == "Clock_Mode") {
+				// Your processing for the transmitted form-variable OVERGANGSMODUS
+				config.ClockMode = server.arg(i).toInt();
+				delay(delaytijd);
+				Serial.println("SET MODE " + server.arg(i));
+				WriteLogLine("SET MODE " + server.arg(i));
+			}
+
+		}
+		WriteClockConfig();
+	}
+	server.send_P(200, CONTENT_Html, PAGE_Clock);
+}
 
