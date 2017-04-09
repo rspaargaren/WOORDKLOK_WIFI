@@ -52,7 +52,12 @@ const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 
 #define ACCESS_POINT_NAME  "WOORDKLOK"				
 #define ACCESS_POINT_PASSWORD  "12345678" 
-#define AdminTimeOut 240
+
+// start out with a timeout of 3 minutes
+// if somebody connects to the hotspot in this 3 minutes, we increase it
+#define CONNECT_TIMEOUT 180
+#define CONFIGURE_TMEOUT 600
+int AdminTimeOut = CONNECT_TIMEOUT;
 
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -116,17 +121,26 @@ void setup(void) {
 	ReadClockConfig();
 
 	if (AdminEnabled) {
-		debug_print(
-				"Admin enabled. Starting access point: " ACCESS_POINT_NAME "; password: " ACCESS_POINT_PASSWORD);
-		WiFi.mode(WIFI_AP_STA);
-		WiFi.softAP( ACCESS_POINT_NAME, ACCESS_POINT_PASSWORD);
+		debug_print("Admin enabled. Starting access point: " ACCESS_POINT_NAME "; password: " ACCESS_POINT_PASSWORD);
+		/*
+		// if a client connects, reset and increase the admin page timeout
+		// give the user enough time to configure the wifi settings
+		WiFi.onSoftAPModeStationConnected(
+			[](const WiFiEventSoftAPModeStationConnected&) {
+				debug_print("Client connected, increasing admin timeout");
+				AdminTimeOutCounter = 0;
+				AdminTimeOut = CONFIGURE_TMEOUT;
+			}
+		);
+		*/
+		ConfigureWifi();
+		WiFi.softAP(ACCESS_POINT_NAME, ACCESS_POINT_PASSWORD);
 	} else {
-		WiFi.mode(WIFI_STA);
+		ConfigureWifi();
+		StartWifi();
 	}
 
-	ConfigureWifi();
 	debug_statement(WiFi.printDiag(Serial));
-
 	httpUpdater.setup(&server);
 	server.on("/", []() {server.send_P ( 200, CONTENT_Html, PAGE_Welcome );});
 	server.on("/admin/filldynamicdataClock", filldynamicdataClock);
@@ -257,7 +271,7 @@ void loop(void) {
 	if (Refresh) {
 		Refresh = false;
 		//debug_print("Refreshing...");
-		debug_printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
+		debug_memory_printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
 	}
 
 }

@@ -64,15 +64,25 @@ struct strConfig {
  **
  */
 void ConfigureWifi() {
-	debug_print("Configuring Wifi");
-	WiFi.begin(config.ssid.c_str(), config.password.c_str());
+	debug_print("Configuring Wifi; SSID: " + config.ssid + "; password: " + config.password);
+	//WiFi.mode(WIFI_STA);
 	if (!config.dhcp) {
+		debug_printf("Wifi config; IP: %d.%d.%d.%d; Gateway: %d.%d.%d.%d",
+				(int)config.IP[0], (int)config.IP[1], (int)config.IP[2], (int)config.IP[3],
+				(int)config.Gateway[0], (int)config.Gateway[1], (int)config.Gateway[2], (int)config.Gateway[3]);
 		WiFi.config(
 			IPAddress(config.IP[0], config.IP[1], config.IP[2], config.IP[3]),
 			IPAddress(config.Gateway[0], config.Gateway[1], config.Gateway[2], config.Gateway[3]),
 			IPAddress(config.Netmask[0], config.Netmask[1], config.Netmask[2], config.Netmask[3])
 		);
 	}
+	WiFi.begin(config.ssid.c_str(), config.password.c_str());
+}
+
+void StartWifi() {
+	debug_print("Starting wifi; SSID: " + config.ssid + "; password: " + config.password);
+	WiFi.mode(WIFI_STA);
+	WiFi.begin(config.ssid.c_str(), config.password.c_str());
 }
 
 void WriteConfig() {

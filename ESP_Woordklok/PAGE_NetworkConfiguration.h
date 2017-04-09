@@ -124,6 +124,7 @@ void send_network_configuration_html() {
 		server.send_P(200, CONTENT_Html, PAGE_WaitAndReload);
 		WriteConfig();
 		ConfigureWifi();
+		StartWifi();
 		AdminTimeOutCounter = 0;
 
 	} else {

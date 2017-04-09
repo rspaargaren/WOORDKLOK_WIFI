@@ -4,6 +4,7 @@
 #include "FS.h"
 
 //#define DEBUG 1
+//#define DEBUG_MEMORY 1
 #ifdef DEBUG
 #  define debug_print(x) Serial.println(x)
 #  define debug_printf(fmt, ...) Serial.printf(fmt, __VA_ARGS__)
@@ -11,7 +12,13 @@
 #else
 #  define debug_print(x)
 #  define debug_printf(fmt, ...)
+#  define debug_memory_printf(fmt, ...)
 #  define debug_statement(x)
+#endif
+#ifdef DEBUG_MEMORY
+#  define debug_memory_printf(fmt, ...) Serial.printf(fmt, __VA_ARGS__)
+#else
+#  define debug_memory_printf(fmt, ...)
 #endif
 
 void WriteLogLine(String LogLine) {
