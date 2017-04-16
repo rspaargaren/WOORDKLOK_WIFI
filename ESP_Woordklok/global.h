@@ -2,10 +2,14 @@
 #define GLOBAL_H
 
 #include <TimeLib.h>
+#include "WifiController.h"
+
+#define ACCESS_POINT_NAME  "WOORDKLOK"
+#define ACCESS_POINT_PASSWORD  "12345678"
+WifiController wifiController(ACCESS_POINT_NAME, ACCESS_POINT_PASSWORD);
 
 ESP8266WebServer server(80);									// The Webserver
 boolean firstStart = true;	// On firststart = true, NTP will try to get a valid time
-int AdminTimeOutCounter = 0;					// Counter for Disabling the AdminMode
 strDateTime DateTime;// Global DateTime structure, will be refreshed every Second
 WiFiUDP UDPNTPClient;											// NTP Client
 unsigned long UnixTimestamp = 0;				// GLOBALTIME  ( Will be set by NTP)
@@ -16,7 +20,6 @@ boolean FirstPackage = false;
 int cNTP_Update = 0;							// Counter for Updating the time via NTP
 int cGet_Time_Update = 0;
 Ticker tkSecond;					// Second - Timer for Updating Datetime Structure
-boolean AdminEnabled = true;		// Enable Admin Mode for a given Time
 byte Minute_Old = 100;// Helpvariable for checking, when a new Minute comes up (for Auto Turn On / Off)
 
 struct strConfig {
@@ -65,24 +68,22 @@ struct strConfig {
  */
 void ConfigureWifi() {
 	debug_print("Configuring Wifi; SSID: " + config.ssid + "; password: " + config.password);
-	//WiFi.mode(WIFI_STA);
 	if (!config.dhcp) {
-		debug_printf("Wifi config; IP: %d.%d.%d.%d; Gateway: %d.%d.%d.%d",
-				(int)config.IP[0], (int)config.IP[1], (int)config.IP[2], (int)config.IP[3],
-				(int)config.Gateway[0], (int)config.Gateway[1], (int)config.Gateway[2], (int)config.Gateway[3]);
-		WiFi.config(
+		debug_printf(
+			"Wifi config; IP: %d.%d.%d.%d; Gateway: %d.%d.%d.%d",
+			(int)config.IP[0], (int)config.IP[1], (int)config.IP[2], (int)config.IP[3],
+			(int)config.Gateway[0], (int)config.Gateway[1], (int)config.Gateway[2], (int)config.Gateway[3]
+		);
+		wifiController.setSTAStaticIPConfig(
 			IPAddress(config.IP[0], config.IP[1], config.IP[2], config.IP[3]),
 			IPAddress(config.Gateway[0], config.Gateway[1], config.Gateway[2], config.Gateway[3]),
 			IPAddress(config.Netmask[0], config.Netmask[1], config.Netmask[2], config.Netmask[3])
 		);
+	} else {
+		wifiController.setSTAStaticIPConfig(IPAddress(), IPAddress(), IPAddress());
 	}
-	WiFi.begin(config.ssid.c_str(), config.password.c_str());
-}
-
-void StartWifi() {
-	debug_print("Starting wifi; SSID: " + config.ssid + "; password: " + config.password);
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(config.ssid.c_str(), config.password.c_str());
+	WiFi.disconnect();
+	wifiController.autoConnect(config.ssid.c_str(), config.password.c_str());
 }
 
 void WriteConfig() {
@@ -273,7 +274,6 @@ boolean NTPRefresh() {
 
 void Second_Tick() {
 	strDateTime tempDateTime;
-	AdminTimeOutCounter++;
 	cNTP_Update++;
 	cGet_Time_Update++;
 	UnixTimestamp++;
@@ -290,15 +290,6 @@ void Second_Tick() {
 		DateTime = tempDateTime;
 	}
 	Refresh = true;
-}
-
-void ResetLogFile() {
-	File bestand = SPIFFS.open("/data.txt", "w"); // open het bestand in schrijf modus.
-	bestand.println(
-			"New Logfile created on: " + String(hour()) + ":" + String(minute())
-					+ ":" + String(second()) + "---" + String(year()) + "/"
-					+ String(month()) + "/" + String(day()));
-	bestand.close();
 }
 
 void Update_Clock_Settings() {

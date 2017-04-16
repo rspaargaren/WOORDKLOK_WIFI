@@ -1,10 +1,12 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "FS.h"
+#include <WString.h>
 
 //#define DEBUG 1
 //#define DEBUG_MEMORY 1
+//#define DEBUG_WIFICONTROLLER 1
+
 #ifdef DEBUG
 #  define debug_print(x) Serial.println(x)
 #  define debug_printf(fmt, ...) Serial.printf(fmt, __VA_ARGS__)
@@ -20,11 +22,13 @@
 #else
 #  define debug_memory_printf(fmt, ...)
 #endif
+#ifdef DEBUG_WIFICONTROLLER
+#  define debug_wc_print(x) Serial.println(x)
+#else
+#  define debug_wc_print(fx)
+#endif
 
-void WriteLogLine(String LogLine) {
-	File bestand = SPIFFS.open("/data.txt", "a+"); // open het bestand in schrijf modus.
-	bestand.println(String(hour()) + ":" + String(minute()) + ":" + String(second()) + " - " + LogLine);
-	bestand.close();
-}
+void WriteLogLine(const String &LogLine);
+void ResetLogFile();
 
 #endif

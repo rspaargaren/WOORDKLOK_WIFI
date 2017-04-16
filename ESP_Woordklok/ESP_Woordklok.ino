@@ -50,14 +50,11 @@ const char CONTENT_Plain[] PROGMEM = R"=====(text/plain)=====";
 #include "Page_Welcome.h"
 #include "log.h"
 
-#define ACCESS_POINT_NAME  "WOORDKLOK"				
-#define ACCESS_POINT_PASSWORD  "12345678" 
-
 // start out with a timeout of 3 minutes
 // if somebody connects to the hotspot in this 3 minutes, we increase it
-#define CONNECT_TIMEOUT 180
-#define CONFIGURE_TMEOUT 600
-int AdminTimeOut = CONNECT_TIMEOUT;
+#define CONNECT_TIMEOUT 20
+#define CONFIGURE_TMEOUT 180
+#define EXTENDED_CONFIGURE_TMEOUT 300
 
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -119,26 +116,11 @@ void setup(void) {
 		debug_print("General config applied");
 	}
 	ReadClockConfig();
-
-	if (AdminEnabled) {
-		debug_print("Admin enabled. Starting access point: " ACCESS_POINT_NAME "; password: " ACCESS_POINT_PASSWORD);
-		/*
-		// if a client connects, reset and increase the admin page timeout
-		// give the user enough time to configure the wifi settings
-		WiFi.onSoftAPModeStationConnected(
-			[](const WiFiEventSoftAPModeStationConnected&) {
-				debug_print("Client connected, increasing admin timeout");
-				AdminTimeOutCounter = 0;
-				AdminTimeOut = CONFIGURE_TMEOUT;
-			}
-		);
-		*/
-		ConfigureWifi();
-		WiFi.softAP(ACCESS_POINT_NAME, ACCESS_POINT_PASSWORD);
-	} else {
-		ConfigureWifi();
-		StartWifi();
-	}
+	wifiController.setConnectTimeout(CONNECT_TIMEOUT);
+	wifiController.setConfigPortalTimeout(CONFIGURE_TMEOUT);
+	wifiController.setExtendedConfigPortalTimeout(EXTENDED_CONFIGURE_TMEOUT);
+	wifiController.setCreateAPOnFailure(true);
+	ConfigureWifi();
 
 	debug_statement(WiFi.printDiag(Serial));
 	httpUpdater.setup(&server);
@@ -187,14 +169,10 @@ void handle_reset() {
 	server.send(302, "text/plain", "OK");
 }
 
+int debugLoop = 0;
+
 void loop(void) {
-	if (AdminEnabled) {
-		if (AdminTimeOutCounter > AdminTimeOut) {
-			AdminEnabled = false;
-			debug_print("Admin Mode disabled!");
-			WiFi.mode(WIFI_STA);
-		}
-	}
+	wifiController.update();
 	if (config.Update_Time_Via_NTP_Every > 0) {
 		if (cNTP_Update > 5 && firstStart) {
 			debug_print("NTPRefresh");
@@ -267,12 +245,17 @@ void loop(void) {
 		String Ser_Input = Serial.readString();
 		WriteLogLine("> " + Ser_Input);
 	}
-
+/*
 	if (Refresh) {
 		Refresh = false;
-		//debug_print("Refreshing...");
-		debug_memory_printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
+		++debugLoop;
+		if (debugLoop >= 10) {
+			debugLoop = 0;
+			debug_statement(WiFi.printDiag(Serial));
+			//debug_print("Refreshing...");
+			//debug_memory_printf("FreeMem:%d %d:%d:%d %d.%d.%d \n",ESP.getFreeHeap() , DateTime.hour,DateTime.minute, DateTime.second, DateTime.year, DateTime.month, DateTime.day);
+		}
 	}
-
+*/
 }
 

@@ -123,10 +123,8 @@ void send_network_configuration_html() {
 		}
 		server.send_P(200, CONTENT_Html, PAGE_WaitAndReload);
 		WriteConfig();
+		wifiController.setCreateAPOnFailure(true);
 		ConfigureWifi();
-		StartWifi();
-		AdminTimeOutCounter = 0;
-
 	} else {
 		server.send_P(200, CONTENT_Html, PAGE_NetworkConfiguration);
 	}
@@ -186,10 +184,16 @@ void send_connection_state_values_html() {
 
 	int n = WiFi.scanNetworks();
 
-	if (n == 0) {
+	if (n < 0) {
+		if (n == WIFI_SCAN_RUNNING) {
+			Networks = "<font color='#FF0000'>A scan is already running</font>";
+		} else {
+			//WIFI_SCAN_FAILED
+			Networks = "<font color='#FF0000'>Scan failed!</font>";
+		}
+	} else if (n == 0) {
 		Networks = "<font color='#FF0000'>No networks found!</font>";
 	} else {
-
 		Networks = "Found " + String(n) + " Networks<br>";
 		Networks += "<table border='0' cellspacing='0' cellpadding='3'>";
 		Networks +=
@@ -218,5 +222,4 @@ void send_connection_state_values_html() {
 	values += "networks|" + Networks + "|div\n";
 	server.send(200, "text/plain", values);
 	//debug_print(__FUNCTION__);
-
 }
