@@ -48,7 +48,6 @@ struct strConfig {
   byte Notat;
   int LMin;
   int LMax;
-  int Transpd;
   int ClockMode;
   int TouchFil;
   int TouchTrL;
@@ -152,7 +151,6 @@ void WriteClockConfig()
   EEPROM.write(458,config.TouchTrH);
   EEPROM.write(459,config.TouchTiS);
   EEPROM.write(460,config.TouchTiL);
-  EEPROM.write(461,config.Transpd);
   EEPROM.commit();
 }
 
@@ -227,7 +225,6 @@ void ReadClockConfig()
     config.TouchTrH = EEPROM.read(458);
     config.TouchTiS = EEPROM.read(459);
     config.TouchTiL = EEPROM.read(460);
-    config.Transpd = EEPROM.read(461);
     //Serial.println("Clock Settings Read");
     //return true;
 }
@@ -339,16 +336,13 @@ void Update_Clock_Settings(){
                  Serial.println("SET LMAX " + (String) config.LMax);
                  WriteLogLine("SET LMAX " + (String) config.LMax);
                  delay(delaytijd);
-                 Serial.println("TRANSPD " + (String) config.Transpd);
-                 WriteLogLine("TRANSPD " + (String) config.Transpd);
-                 delay(delaytijd);
                  if (config.SoundOnOff) {     
-                    Serial.println("SET AUDIOENA TRUE");
-                    WriteLogLine("SET AUDIOENA TRUE");
+                    Serial.println("SET SOUND 1");
+                    WriteLogLine("SET SOUND 1");
                  }
                  else {
-                    Serial.println("SET AUDIOENA FALSE");
-                    WriteLogLine("SET AUDIOENA FALSE");
+                    Serial.println("SET SOUND 0");
+                    WriteLogLine("SET SOUND 0");
                  }
                   delay(delaytijd);
                   Serial.println ("SET TOUCH " + (String) config.TouchFil + " " + (String) config.TouchTrH + " " + (String) config.TouchTrL + " " + (String) config.TouchTiS + " " + (String) config.TouchTiL);

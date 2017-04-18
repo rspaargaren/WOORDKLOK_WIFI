@@ -72,7 +72,6 @@ const char PAGE_AdminGeneralSettings[] PROGMEM =  R"=====(
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Tcomp" name='bGet_Tcomp' style="width:150px" class="btn btn--m btn--blue" value="GETTCOMP"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Sound" name='bGet_Sound' style="width:150px" class="btn btn--m btn--blue" value="GETSOUND"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Time" name='bGet_Time' style="width:150px" class="btn btn--m btn--blue" value="GETTIME"></td></tr>
-<tr><td colspan="2" align="center"><input type="submit" id="bAudio_Off" name='bAudio_Off' style="width:150px" class="btn btn--m btn--blue" value="NO MORE SOUND"></td></tr>
 <tr><td> <input type="text" id="man_input" name="man_input" value=""></td><td  align="center"><input type="submit" id="bManual" name='bManual' style="width:150px" class="btn btn--m btn--blue" value="GETMAN"></td></tr>
 
 
@@ -138,8 +137,8 @@ void send_general_html()
         WriteLogLine("GET TOUCH");
       }
       if (server.argName(i) == "bGet_Sound") {
-        Serial.println("GET AUDIOENA");
-        WriteLogLine("GET AUDIOENA");
+        Serial.println("GET SOUND");
+        WriteLogLine("GET SOUND");
       }
       if (server.argName(i) == "bGet_Light") {
         Serial.println("GET LIGHT");
@@ -152,10 +151,6 @@ void send_general_html()
       if (server.argName(i) == "bGet_Tcomp") {
         Serial.println("GET TCOMP");
         WriteLogLine("GET TCOMP");
-      }
-      if (server.argName(i) == "bAudio_Off") {
-        Serial.println("CLRFLASH 1");
-        WriteLogLine("CLRFLASH 1");
       }
       if (server.argName(i) == "bGet_Time") {
         Serial.println("GET TIME");
