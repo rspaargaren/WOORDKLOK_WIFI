@@ -50,6 +50,7 @@ struct strConfig {
 	byte Notat;
 	int LMin;
 	int LMax;
+  int Transpd;
 	int ClockMode;
 	int TouchFil;
 	int TouchTrL;
@@ -148,6 +149,7 @@ void WriteClockConfig() {
 	EEPROM.write(458, config.TouchTrH);
 	EEPROM.write(459, config.TouchTiS);
 	EEPROM.write(460, config.TouchTiL);
+  EEPROM.write(461,config.Transpd);
 	EEPROM.commit();
 }
 
@@ -215,6 +217,7 @@ void ReadClockConfig() {
 	config.TouchTrH = EEPROM.read(458);
 	config.TouchTiS = EEPROM.read(459);
 	config.TouchTiL = EEPROM.read(460);
+  config.Transpd = EEPROM.read(461);
 	debug_print("Clock Settings Read");
 }
 
@@ -303,6 +306,8 @@ void Update_Clock_Settings() {
 	Clock::setLMax(config.LMax);
 	delay(delaytijd);
 	Clock::enableSound(config.SoundOnOff);
+  delay(delaytijd);
+  Clock::Transpd(config.Transpd);
 	delay(delaytijd);
 	Clock::setTouch(config.TouchFil, config.TouchTrH, config.TouchTrL, config.TouchTiS, config.TouchTiL);
 	delay(delaytijd);

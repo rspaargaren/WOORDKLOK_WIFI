@@ -72,6 +72,7 @@ const char PAGE_AdminGeneralSettings[] PROGMEM = R"=====(
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Tcomp" name='bGet_Tcomp' style="width:150px" class="btn btn--m btn--blue" value="GETTCOMP"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Sound" name='bGet_Sound' style="width:150px" class="btn btn--m btn--blue" value="GETSOUND"></td></tr>
 <tr><td colspan="2" align="center"><input type="submit" id="bGet_Time" name='bGet_Time' style="width:150px" class="btn btn--m btn--blue" value="GETTIME"></td></tr>
+<tr><td colspan="2" align="center"><input type="submit" id="bAudio_Off" name='bAudio_Off' style="width:150px" class="btn btn--m btn--blue" value="NO MORE SOUND"></td></tr>
 <tr><td> <input type="text" id="man_input" name="man_input" value=""></td><td  align="center"><input type="submit" id="bManual" name='bManual' style="width:150px" class="btn btn--m btn--blue" value="GETMAN"></td></tr>
 
 
@@ -151,6 +152,9 @@ void send_general_html() {
 			if (server.argName(i) == "bGet_Mode") {
 				Clock::getMode();
 			}
+      if (server.argName(i) == "bAudio_Off") {
+        Clock::clrFlash();
+      }
 			if (server.argName(i) == "bGet_Tcomp") {
 				Clock::getTComp();
 			}

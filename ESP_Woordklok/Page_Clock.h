@@ -49,6 +49,14 @@ const char PAGE_Clock[] PROGMEM = R"=====(
   </tr>
  </table>
   <hr>
+  <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">
+  <tr>
+    <td align="center" colspan="2">Transitiesnelheid</td>
+  </tr><tr>
+  <td align="center">1 tot 1000 -- (hoger = trager) <input type='number' id="Transpd" name='Transpd'  min="1" max="1000" value='1' pattern="[0-9]*" > </td>
+  </tr>
+ </table>
+  <hr>
   <table border="0"  cellspacing="0" cellpadding="3" style="width:300px">  
   <tr><td align="center" colspan="3">Klok Tijd</td></tr>
  <tr><td align="left" colspan="3"><input type="checkbox" id="Update_Tijd" name="Update_Tijd" value="True"> Update tijd</td></tr><tr>
@@ -116,6 +124,7 @@ void filldynamicdataClock() {
 	values += "Time_Min|" + (String) minute() + "|input\n"; //(String) DateTime.minute + "|input\n";
 	values += "Time_Sec|" + (String) second() + "|input\n"; //(String) DateTime.second + "|input\n";
 	values += "Clock_Mode|" + String(config.ClockMode) + "|input\n";
+  values += "Transpd|" +  String(config.Transpd) + "|input\n";
 	values += "Touch_Fil|" + (String) config.TouchFil + "|input\n";
 	values += "Touch_Tr_High|" + (String) config.TouchTrH + "|input\n";
 	values += "Touch_Tr_Low|" + (String) config.TouchTrL + "|input\n";
@@ -146,6 +155,12 @@ void processClock() {
 				delay(delaytijd);
 				Clock::setLMax(config.LMax);
 			}
+      if (server.argName(i) == "Light_Max") {
+        // Your processing for the transmitted form-variable TRANSITIE SNELHEID
+        config.Transpd = server.arg(i).toInt();
+        delay(delaytijd);
+        Clock::Transpd(config.Transpd);;
+      }
 			if (server.argName(i) == "Sound") {
 				// Your processing for the transmitted form-variable GELUID AAN / UIT
 				config.SoundOnOff = server.arg(i) == "ON";

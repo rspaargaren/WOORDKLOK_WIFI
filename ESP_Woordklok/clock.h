@@ -27,6 +27,10 @@ class Clock {
 			runCommand("GET SOUND");
 		}
 
+    static void clrFlash() {
+      runCommand("CLRFLASH 1");
+    }
+
 		static void getLight() {
 			runCommand("GET LIGHT");
 		}
@@ -59,8 +63,12 @@ class Clock {
 			runCommand("SET LMAX " + (String) max);
 		}
 
+    static void Transpd(int max) {
+      runCommand("TRANSPD " + (String) max);
+    }
+
 		static void enableSound(bool enable) {
-			String cmd = String("SET SOUND ") + (enable ? String("1") : String("0"));
+			String cmd = String("SET AUDIOENA ") + (enable ? String("TRUE") : String("FALSE"));
 			runCommand(cmd);
 		}
 
