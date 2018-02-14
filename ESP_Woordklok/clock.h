@@ -64,7 +64,7 @@ class Clock {
 		}
 
     static void Transpd(int max) {
-      runCommand("TRANSPD " + (String) max);
+      runCommand("SET TRANSPD " + (String) max);
     }
 
 		static void enableSound(bool enable) {
