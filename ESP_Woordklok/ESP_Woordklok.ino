@@ -87,7 +87,7 @@ void setup(void) {
 		config.Gateway[1] = 168;
 		config.Gateway[2] = 1;
 		config.Gateway[3] = 1;
-		config.ntpServerName = "0.de.pool.ntp.org";
+		config.ntpServerName = "0.nl.pool.ntp.org";
 		config.Update_Time_Via_NTP_Every = 0;
 		config.timezone = -10;
 		config.daylight = true;

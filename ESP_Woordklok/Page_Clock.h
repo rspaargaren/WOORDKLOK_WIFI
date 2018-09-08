@@ -155,7 +155,7 @@ void processClock() {
 				delay(delaytijd);
 				Clock::setLMax(config.LMax);
 			}
-      if (server.argName(i) == "Light_Max") {
+      if (server.argName(i) == "Transpd") {
         // Your processing for the transmitted form-variable TRANSITIE SNELHEID
         config.Transpd = server.arg(i).toInt();
         delay(delaytijd);
